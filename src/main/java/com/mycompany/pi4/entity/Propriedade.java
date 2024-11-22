@@ -8,16 +8,11 @@ import java.util.Date;
 
 public class Propriedade {
     private int idPropriedade;
-    private Cliente cliente;  // Relacionamento com Cliente
-    private Veiculo veiculo;  // Relacionamento com Veiculo
+    private Cliente cliente;
+    private Veiculo veiculo;
     private Date dataInicio;
     private Date dataFim;
 
-    // Construtor vazio
-    public Propriedade() {
-    }
-
-    // Construtor completo
     public Propriedade(int idPropriedade, Cliente cliente, Veiculo veiculo, Date dataInicio, Date dataFim) {
         this.idPropriedade = idPropriedade;
         this.cliente = cliente;
@@ -26,7 +21,6 @@ public class Propriedade {
         this.dataFim = dataFim;
     }
 
-    // Getters e Setters
     public int getIdPropriedade() {
         return idPropriedade;
     }
@@ -69,7 +63,7 @@ public class Propriedade {
 
     @Override
     public String toString() {
-        return "Propriedade {" +
+        return "Propriedade { " +
                 "idPropriedade=" + idPropriedade +
                 ", cliente=" + cliente.getNome() +
                 ", veiculo=" + veiculo.getPlaca() +

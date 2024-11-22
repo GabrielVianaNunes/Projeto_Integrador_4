@@ -9,17 +9,11 @@ public class Marca {
     private int idMarca;
     private String nome;
 
-    // Construtor vazio
-    public Marca() {
-    }
-
-    // Construtor completo
     public Marca(int idMarca, String nome) {
         this.idMarca = idMarca;
         this.nome = nome;
     }
 
-    // Getters e Setters
     public int getIdMarca() {
         return idMarca;
     }
@@ -38,10 +32,9 @@ public class Marca {
 
     @Override
     public String toString() {
-        return "Marca {" +
+        return "Marca { " +
                 "idMarca=" + idMarca +
                 ", nome='" + nome + '\'' +
                 '}';
     }
 }
-

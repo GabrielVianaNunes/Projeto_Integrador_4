@@ -1,27 +1,48 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.pi4.util;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DatabaseConnection {
 
-    // Configurações do banco de dados PostgreSQL
-    private static final String URL = "jdbc:postgresql://localhost:5432/AutoGyn";
-    private static final String USER = "postgres"; // Substitua pelo usuário do seu PostgreSQL
-    private static final String PASSWORD = "sua_senha"; // Substitua pela senha do seu PostgreSQL
+    // Logger para registrar mensagens
+    private static final Logger logger = LoggerFactory.getLogger(DatabaseConnection.class);
 
-    // Método para obter conexão com o banco de dados
+    // Configurações do banco de dados PostgreSQL
+    private static final String URL = "sua_url"; // Substitua pelo seu URL
+    private static final String USER = "seu_user"; // Substitua pelo seu usuário
+    private static final String PASSWORD = "sua_senha"; // Substitua pela sua senha
+
+    /**
+     * Método para obter conexão com o banco de dados.
+     * @return Um objeto Connection para interação com o banco de dados.
+     * @throws SQLException Caso ocorra erro na conexão.
+     */
     public static Connection getConnection() throws SQLException {
         try {
-            return DriverManager.getConnection(URL, USER, PASSWORD);
+            Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+            logger.info("Conexão com o banco de dados estabelecida com sucesso.");
+            return connection;
         } catch (SQLException e) {
-            System.err.println("Erro ao conectar ao banco de dados: " + e.getMessage());
+            logger.error("Erro ao conectar ao banco de dados: {}", e.getMessage());
             throw e; // Repassa a exceção para tratamento posterior
+        }
+    }
+
+    /**
+     * Método para testar a conexão com o banco de dados.
+     *
+     * @return true se a conexão for bem-sucedida, false caso contrário.
+     */
+    public static boolean testConnection() {
+        try (Connection connection = getConnection()) {
+            return connection != null && !connection.isClosed();
+        } catch (SQLException e) {
+            logger.error("Falha ao testar conexão com o banco: {}", e.getMessage());
+            return false;
         }
     }
 }

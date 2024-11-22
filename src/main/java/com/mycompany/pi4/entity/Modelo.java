@@ -8,20 +8,14 @@ package com.mycompany.pi4.entity;
 public class Modelo {
     private int idModelo;
     private String nome;
-    private Marca marca; // Relacionamento com Marca
+    private Marca marca;
 
-    // Construtor vazio
-    public Modelo() {
-    }
-
-    // Construtor completo
     public Modelo(int idModelo, String nome, Marca marca) {
         this.idModelo = idModelo;
         this.nome = nome;
         this.marca = marca;
     }
 
-    // Getters e Setters
     public int getIdModelo() {
         return idModelo;
     }
@@ -48,11 +42,10 @@ public class Modelo {
 
     @Override
     public String toString() {
-        return "Modelo {" +
+        return "Modelo { " +
                 "idModelo=" + idModelo +
                 ", nome='" + nome + '\'' +
                 ", marca=" + (marca != null ? marca.getNome() : "null") +
                 '}';
     }
 }
-

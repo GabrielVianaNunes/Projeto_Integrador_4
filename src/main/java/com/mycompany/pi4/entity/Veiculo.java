@@ -14,14 +14,9 @@ public class Veiculo {
     private int anoModelo;
     private String placa;
 
-    private Modelo modelo;             // Relacionamento com Modelo
-    private List<OrdemServico> ordensServico; // Lista de O.S.
+    private Modelo modelo;
+    private List<OrdemServico> ordensServico;
 
-    // Construtor vazio
-    public Veiculo() {
-    }
-
-    // Construtor completo
     public Veiculo(int idVeiculo, String chassi, int quilometragem, int anoFabricacao, int anoModelo, String placa, Modelo modelo) {
         this.idVeiculo = idVeiculo;
         this.chassi = chassi;
@@ -32,7 +27,6 @@ public class Veiculo {
         this.modelo = modelo;
     }
 
-    // Getters e Setters
     public int getIdVeiculo() {
         return idVeiculo;
     }
@@ -99,7 +93,7 @@ public class Veiculo {
 
     @Override
     public String toString() {
-        return "Veiculo {" +
+        return "Veiculo { " +
                 "idVeiculo=" + idVeiculo +
                 ", chassi='" + chassi + '\'' +
                 ", quilometragem=" + quilometragem +

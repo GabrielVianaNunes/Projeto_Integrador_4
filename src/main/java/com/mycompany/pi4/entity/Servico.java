@@ -4,23 +4,19 @@
  */
 package com.mycompany.pi4.entity;
 
+import java.math.BigDecimal;
+
 public class Servico {
     private int idServico;
     private String descricao;
-    private double precoUnitario;
+    private BigDecimal precoUnitario;
 
-    // Construtor vazio
-    public Servico() {
-    }
-
-    // Construtor completo
-    public Servico(int idServico, String descricao, double precoUnitario) {
+    public Servico(int idServico, String descricao, BigDecimal precoUnitario) {
         this.idServico = idServico;
         this.descricao = descricao;
         this.precoUnitario = precoUnitario;
     }
 
-    // Getters e Setters
     public int getIdServico() {
         return idServico;
     }
@@ -37,17 +33,17 @@ public class Servico {
         this.descricao = descricao;
     }
 
-    public double getPrecoUnitario() {
+    public BigDecimal getPrecoUnitario() {
         return precoUnitario;
     }
 
-    public void setPrecoUnitario(double precoUnitario) {
+    public void setPrecoUnitario(BigDecimal precoUnitario) {
         this.precoUnitario = precoUnitario;
     }
 
     @Override
     public String toString() {
-        return "Servico {" +
+        return "Servico { " +
                 "idServico=" + idServico +
                 ", descricao='" + descricao + '\'' +
                 ", precoUnitario=" + precoUnitario +

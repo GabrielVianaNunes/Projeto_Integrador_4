@@ -15,7 +15,6 @@ public abstract class Cliente {
     private String cep;
     private String setor;
 
-    // Construtor
     public Cliente(int idCliente, String nome, String telefone, String email, String endereco, String logradouro, String rua, String cep, String setor) {
         this.idCliente = idCliente;
         this.nome = nome;
@@ -28,7 +27,6 @@ public abstract class Cliente {
         this.setor = setor;
     }
 
-    // Getters e Setters
     public int getIdCliente() {
         return idCliente;
     }
@@ -101,7 +99,5 @@ public abstract class Cliente {
         this.setor = setor;
     }
 
-    // Método abstrato para identificar o tipo de cliente
     public abstract String getTipoCliente();
 }
-

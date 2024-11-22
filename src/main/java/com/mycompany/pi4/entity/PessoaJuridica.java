@@ -10,7 +10,6 @@ public class PessoaJuridica extends Cliente {
     private String inscricaoEstadual;
     private String contato;
 
-    // Construtor
     public PessoaJuridica(int idCliente, String nome, String telefone, String email, String endereco, String logradouro, String rua, String cep, String setor, String cnpj, String inscricaoEstadual, String contato) {
         super(idCliente, nome, telefone, email, endereco, logradouro, rua, cep, setor);
         this.cnpj = cnpj;
@@ -18,7 +17,6 @@ public class PessoaJuridica extends Cliente {
         this.contato = contato;
     }
 
-    // Getters e Setters
     public String getCnpj() {
         return cnpj;
     }

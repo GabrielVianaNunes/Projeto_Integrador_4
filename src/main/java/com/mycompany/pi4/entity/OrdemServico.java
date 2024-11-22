@@ -4,23 +4,18 @@
  */
 package com.mycompany.pi4.entity;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
 public class OrdemServico {
     private int idOS;
-    private String status; // Status da O.S. (Aberta, Concluída, Cancelada, etc.)
+    private String status;
     private Date dataInicio;
-
-    private Veiculo veiculo;           
-    private List<ItensServico> itensServico; 
+    private Veiculo veiculo;
+    private List<ItensServico> itensServico;
     private List<ItensPeca> itensPeca;
 
-    // Construtor vazio
-    public OrdemServico() {
-    }
-
-    // Construtor completo
     public OrdemServico(int idOS, String status, Date dataInicio, Veiculo veiculo, List<ItensServico> itensServico, List<ItensPeca> itensPeca) {
         this.idOS = idOS;
         this.status = status;
@@ -30,7 +25,6 @@ public class OrdemServico {
         this.itensPeca = itensPeca;
     }
 
-    // Getters e Setters
     public int getIdOS() {
         return idOS;
     }
@@ -79,37 +73,13 @@ public class OrdemServico {
         this.itensPeca = itensPeca;
     }
 
-    // Calcula dinamicamente a quantidade de serviços
-    public int getQuantidadeServico() {
-        return itensServico != null ? itensServico.size() : 0;
-    }
-
-    // Calcula dinamicamente a quantidade de itens
-    public int getQuantidadeItens() {
-        return itensPeca != null ? itensPeca.size() : 0;
-    }
-
-    // Calcula dinamicamente o valor total da O.S.
-    public double getValorTotal() {
-        double totalServico = itensServico != null
-                ? itensServico.stream().mapToDouble(ItensServico::getValorTotal).sum()
-                : 0;
-        double totalPeca = itensPeca != null
-                ? itensPeca.stream().mapToDouble(ItensPeca::getValorTotal).sum()
-                : 0;
-        return totalServico + totalPeca;
-    }
-
-    @Override
-    public String toString() {
-        return "OrdemServico {" +
-                "idOS=" + idOS +
-                ", quantidadeServico=" + getQuantidadeServico() +
-                ", quantidadeItens=" + getQuantidadeItens() +
-                ", status='" + status + '\'' +
-                ", dataInicio=" + dataInicio +
-                ", valorTotal=" + getValorTotal() +
-                ", veiculo=" + (veiculo != null ? veiculo.getPlaca() : "null") +
-                '}';
+    public BigDecimal getValorTotal() {
+        BigDecimal totalServico = itensServico.stream()
+                .map(ItensServico::getValorTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalPeca = itensPeca.stream()
+                .map(ItensPeca::getValorTotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return totalServico.add(totalPeca);
     }
 }

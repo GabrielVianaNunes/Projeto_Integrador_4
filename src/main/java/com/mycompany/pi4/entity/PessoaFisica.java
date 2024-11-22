@@ -8,13 +8,11 @@ package com.mycompany.pi4.entity;
 public class PessoaFisica extends Cliente {
     private String cpf;
 
-    // Construtor
     public PessoaFisica(int idCliente, String nome, String telefone, String email, String endereco, String logradouro, String rua, String cep, String setor, String cpf) {
         super(idCliente, nome, telefone, email, endereco, logradouro, rua, cep, setor);
         this.cpf = cpf;
     }
 
-    // Getter e Setter
     public String getCpf() {
         return cpf;
     }

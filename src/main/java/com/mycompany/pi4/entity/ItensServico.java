@@ -4,28 +4,24 @@
  */
 package com.mycompany.pi4.entity;
 
+import java.math.BigDecimal;
+
 public class ItensServico {
     private int idItemServico;
-    private int quantidade; // Quantidade do serviço realizado
-    private double valorTotal; // Calculado: quantidade * precoUnitario
-    private double precoUnitario; // Preço unitário do serviço
+    private int quantidade;
+    private BigDecimal valorTotal;
+    private BigDecimal precoUnitario;
 
-    private Servico servico; // Relacionamento com a classe Servico
+    private Servico servico;
 
-    // Construtor vazio
-    public ItensServico() {
-    }
-
-    // Construtor completo
-    public ItensServico(int idItemServico, int quantidade, double precoUnitario, Servico servico) {
+    public ItensServico(int idItemServico, int quantidade, BigDecimal precoUnitario, Servico servico) {
         this.idItemServico = idItemServico;
         this.quantidade = quantidade;
         this.precoUnitario = precoUnitario;
-        this.valorTotal = quantidade * precoUnitario;
+        this.valorTotal = precoUnitario.multiply(BigDecimal.valueOf(quantidade));
         this.servico = servico;
     }
 
-    // Getters e Setters
     public int getIdItemServico() {
         return idItemServico;
     }
@@ -40,22 +36,20 @@ public class ItensServico {
 
     public void setQuantidade(int quantidade) {
         this.quantidade = quantidade;
-        this.valorTotal = quantidade * this.precoUnitario; // Recalcula o valor total
+        this.valorTotal = this.precoUnitario.multiply(BigDecimal.valueOf(quantidade));
     }
 
-    public double getValorTotal() {
+    public BigDecimal getValorTotal() {
         return valorTotal;
     }
 
-    // Não há setter para valorTotal, pois ele é calculado automaticamente
-
-    public double getPrecoUnitario() {
+    public BigDecimal getPrecoUnitario() {
         return precoUnitario;
     }
 
-    public void setPrecoUnitario(double precoUnitario) {
+    public void setPrecoUnitario(BigDecimal precoUnitario) {
         this.precoUnitario = precoUnitario;
-        this.valorTotal = this.quantidade * precoUnitario; // Recalcula o valor total
+        this.valorTotal = precoUnitario.multiply(BigDecimal.valueOf(this.quantidade));
     }
 
     public Servico getServico() {
@@ -64,16 +58,5 @@ public class ItensServico {
 
     public void setServico(Servico servico) {
         this.servico = servico;
-    }
-
-    @Override
-    public String toString() {
-        return "ItensServico {" +
-                "idItemServico=" + idItemServico +
-                ", quantidade=" + quantidade +
-                ", valorTotal=" + valorTotal +
-                ", precoUnitario=" + precoUnitario +
-                ", servico=" + (servico != null ? servico.getDescricao() : "null") +
-                '}';
     }
 }

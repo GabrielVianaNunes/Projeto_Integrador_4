@@ -4,21 +4,21 @@
  */
 package com.mycompany.pi4.entity;
 
-import java.math.BigDecimal;
-
 public class Peca {
+
     private int idPeca;
     private String descricao;
     private int quantidade;
-    private BigDecimal precoUnitario;
+    private double precoUnitario;
 
-    public Peca(int idPeca, String descricao, int quantidade, BigDecimal precoUnitario) {
+    public Peca(int idPeca, String descricao, int quantidade, double precoUnitario) {
         this.idPeca = idPeca;
         this.descricao = descricao;
         this.quantidade = quantidade;
         this.precoUnitario = precoUnitario;
     }
 
+    // Getters e setters
     public int getIdPeca() {
         return idPeca;
     }
@@ -43,11 +43,11 @@ public class Peca {
         this.quantidade = quantidade;
     }
 
-    public BigDecimal getPrecoUnitario() {
+    public double getPrecoUnitario() {
         return precoUnitario;
     }
 
-    public void setPrecoUnitario(BigDecimal precoUnitario) {
+    public void setPrecoUnitario(double precoUnitario) {
         this.precoUnitario = precoUnitario;
     }
 }

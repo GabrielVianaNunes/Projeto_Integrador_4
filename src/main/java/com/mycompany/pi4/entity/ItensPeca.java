@@ -4,24 +4,23 @@
  */
 package com.mycompany.pi4.entity;
 
-import java.math.BigDecimal;
-
 public class ItensPeca {
+
     private int idItemPeca;
-    private int quantidade;
-    private BigDecimal valorTotal;
-    private BigDecimal precoUnitario;
-
+    private OrdemServico ordemServico;
     private Peca peca;
+    private int quantidade;
+    private double precoUnitario;
 
-    public ItensPeca(int idItemPeca, int quantidade, BigDecimal precoUnitario, Peca peca) {
+    public ItensPeca(int idItemPeca, OrdemServico ordemServico, Peca peca, int quantidade, double precoUnitario) {
         this.idItemPeca = idItemPeca;
+        this.ordemServico = ordemServico;
+        this.peca = peca;
         this.quantidade = quantidade;
         this.precoUnitario = precoUnitario;
-        this.valorTotal = precoUnitario.multiply(BigDecimal.valueOf(quantidade));
-        this.peca = peca;
     }
 
+    // Getters e setters
     public int getIdItemPeca() {
         return idItemPeca;
     }
@@ -30,26 +29,12 @@ public class ItensPeca {
         this.idItemPeca = idItemPeca;
     }
 
-    public int getQuantidade() {
-        return quantidade;
+    public OrdemServico getOrdemServico() {
+        return ordemServico;
     }
 
-    public void setQuantidade(int quantidade) {
-        this.quantidade = quantidade;
-        this.valorTotal = this.precoUnitario.multiply(BigDecimal.valueOf(quantidade));
-    }
-
-    public BigDecimal getValorTotal() {
-        return valorTotal;
-    }
-
-    public BigDecimal getPrecoUnitario() {
-        return precoUnitario;
-    }
-
-    public void setPrecoUnitario(BigDecimal precoUnitario) {
-        this.precoUnitario = precoUnitario;
-        this.valorTotal = precoUnitario.multiply(BigDecimal.valueOf(this.quantidade));
+    public void setOrdemServico(OrdemServico ordemServico) {
+        this.ordemServico = ordemServico;
     }
 
     public Peca getPeca() {
@@ -58,5 +43,21 @@ public class ItensPeca {
 
     public void setPeca(Peca peca) {
         this.peca = peca;
+    }
+
+    public int getQuantidade() {
+        return quantidade;
+    }
+
+    public void setQuantidade(int quantidade) {
+        this.quantidade = quantidade;
+    }
+
+    public double getPrecoUnitario() {
+        return precoUnitario;
+    }
+
+    public void setPrecoUnitario(double precoUnitario) {
+        this.precoUnitario = precoUnitario;
     }
 }

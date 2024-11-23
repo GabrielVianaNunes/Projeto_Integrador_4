@@ -7,64 +7,30 @@ package com.mycompany.pi4.entity;
 import java.util.List;
 
 public class Veiculo {
+
     private int idVeiculo;
-    private String chassi;
-    private int quilometragem;
-    private int anoFabricacao;
-    private int anoModelo;
     private String placa;
-
+    private int ano;
+    private int quilometragem;
+    private Cliente cliente;
     private Modelo modelo;
-    private List<OrdemServico> ordensServico;
 
-    public Veiculo(int idVeiculo, String chassi, int quilometragem, int anoFabricacao, int anoModelo, String placa, Modelo modelo) {
+    public Veiculo(int idVeiculo, String placa, int ano, int quilometragem, Cliente cliente, Modelo modelo) {
         this.idVeiculo = idVeiculo;
-        this.chassi = chassi;
-        this.quilometragem = quilometragem;
-        this.anoFabricacao = anoFabricacao;
-        this.anoModelo = anoModelo;
         this.placa = placa;
+        this.ano = ano;
+        this.quilometragem = quilometragem;
+        this.cliente = cliente;
         this.modelo = modelo;
     }
 
+    // Getters e setters
     public int getIdVeiculo() {
         return idVeiculo;
     }
 
     public void setIdVeiculo(int idVeiculo) {
         this.idVeiculo = idVeiculo;
-    }
-
-    public String getChassi() {
-        return chassi;
-    }
-
-    public void setChassi(String chassi) {
-        this.chassi = chassi;
-    }
-
-    public int getQuilometragem() {
-        return quilometragem;
-    }
-
-    public void setQuilometragem(int quilometragem) {
-        this.quilometragem = quilometragem;
-    }
-
-    public int getAnoFabricacao() {
-        return anoFabricacao;
-    }
-
-    public void setAnoFabricacao(int anoFabricacao) {
-        this.anoFabricacao = anoFabricacao;
-    }
-
-    public int getAnoModelo() {
-        return anoModelo;
-    }
-
-    public void setAnoModelo(int anoModelo) {
-        this.anoModelo = anoModelo;
     }
 
     public String getPlaca() {
@@ -75,32 +41,35 @@ public class Veiculo {
         this.placa = placa;
     }
 
+    public int getAno() {
+        return ano;
+    }
+
+    public void setAno(int ano) {
+        this.ano = ano;
+    }
+
+    public int getQuilometragem() {
+        return quilometragem;
+    }
+
+    public void setQuilometragem(int quilometragem) {
+        this.quilometragem = quilometragem;
+    }
+
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
+
     public Modelo getModelo() {
         return modelo;
     }
 
     public void setModelo(Modelo modelo) {
         this.modelo = modelo;
-    }
-
-    public List<OrdemServico> getOrdensServico() {
-        return ordensServico;
-    }
-
-    public void setOrdensServico(List<OrdemServico> ordensServico) {
-        this.ordensServico = ordensServico;
-    }
-
-    @Override
-    public String toString() {
-        return "Veiculo { " +
-                "idVeiculo=" + idVeiculo +
-                ", chassi='" + chassi + '\'' +
-                ", quilometragem=" + quilometragem +
-                ", anoFabricacao=" + anoFabricacao +
-                ", anoModelo=" + anoModelo +
-                ", placa='" + placa + '\'' +
-                ", modelo=" + (modelo != null ? modelo.getNome() : "null") +
-                '}';
     }
 }

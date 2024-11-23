@@ -6,25 +6,16 @@ package com.mycompany.pi4.entity;
 
 
 public class PessoaJuridica extends Cliente {
-    private String cnpj;
     private String inscricaoEstadual;
     private String contato;
 
-    public PessoaJuridica(int idCliente, String nome, String telefone, String email, String endereco, String logradouro, String rua, String cep, String setor, String cnpj, String inscricaoEstadual, String contato) {
-        super(idCliente, nome, telefone, email, endereco, logradouro, rua, cep, setor);
-        this.cnpj = cnpj;
+    public PessoaJuridica(int idCliente, String nome, String telefone, String email, String endereco, String cep, String logradouro, String cnpj, String inscricaoEstadual, String contato) {
+        super(idCliente, nome, telefone, email, endereco, cep, logradouro, "PJ", null, cnpj); // "PJ" para tipoCliente e null para cpf
         this.inscricaoEstadual = inscricaoEstadual;
         this.contato = contato;
     }
 
-    public String getCnpj() {
-        return cnpj;
-    }
-
-    public void setCnpj(String cnpj) {
-        this.cnpj = cnpj;
-    }
-
+    // Getters e setters
     public String getInscricaoEstadual() {
         return inscricaoEstadual;
     }
@@ -44,5 +35,13 @@ public class PessoaJuridica extends Cliente {
     @Override
     public String getTipoCliente() {
         return "Pessoa Jurídica";
+    }
+
+    public String getCnpj() {
+        return super.getCnpj();
+    }
+
+    public void setCnpj(String cnpj) {
+        super.setCnpj(cnpj);
     }
 }

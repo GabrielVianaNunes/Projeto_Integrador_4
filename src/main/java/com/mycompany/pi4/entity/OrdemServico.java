@@ -4,41 +4,33 @@
  */
 package com.mycompany.pi4.entity;
 
-import java.math.BigDecimal;
 import java.util.Date;
-import java.util.List;
 
 public class OrdemServico {
-    private int idOS;
-    private String status;
-    private Date dataInicio;
-    private Veiculo veiculo;
-    private List<ItensServico> itensServico;
-    private List<ItensPeca> itensPeca;
 
-    public OrdemServico(int idOS, String status, Date dataInicio, Veiculo veiculo, List<ItensServico> itensServico, List<ItensPeca> itensPeca) {
+    private int idOS;
+    private Date dataInicio;
+    private Date dataFim;
+    private String status;
+    private double valorTotal;
+    private Veiculo veiculo;
+
+    public OrdemServico(int idOS, Date dataInicio, Date dataFim, String status, double valorTotal, Veiculo veiculo) {
         this.idOS = idOS;
-        this.status = status;
         this.dataInicio = dataInicio;
+        this.dataFim = dataFim;
+        this.status = status;
+        this.valorTotal = valorTotal;
         this.veiculo = veiculo;
-        this.itensServico = itensServico;
-        this.itensPeca = itensPeca;
     }
 
+    // Getters e setters
     public int getIdOS() {
         return idOS;
     }
 
     public void setIdOS(int idOS) {
         this.idOS = idOS;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
     }
 
     public Date getDataInicio() {
@@ -49,37 +41,35 @@ public class OrdemServico {
         this.dataInicio = dataInicio;
     }
 
+    public Date getDataFim() {
+        return dataFim;
+    }
+
+    public void setDataFim(Date dataFim) {
+        this.dataFim = dataFim;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public double getValorTotal() {
+        return valorTotal;
+    }
+
+    public void setValorTotal(double valorTotal) {
+        this.valorTotal = valorTotal;
+    }
+
     public Veiculo getVeiculo() {
         return veiculo;
     }
 
     public void setVeiculo(Veiculo veiculo) {
         this.veiculo = veiculo;
-    }
-
-    public List<ItensServico> getItensServico() {
-        return itensServico;
-    }
-
-    public void setItensServico(List<ItensServico> itensServico) {
-        this.itensServico = itensServico;
-    }
-
-    public List<ItensPeca> getItensPeca() {
-        return itensPeca;
-    }
-
-    public void setItensPeca(List<ItensPeca> itensPeca) {
-        this.itensPeca = itensPeca;
-    }
-
-    public BigDecimal getValorTotal() {
-        BigDecimal totalServico = itensServico.stream()
-                .map(ItensServico::getValorTotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        BigDecimal totalPeca = itensPeca.stream()
-                .map(ItensPeca::getValorTotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        return totalServico.add(totalPeca);
     }
 }

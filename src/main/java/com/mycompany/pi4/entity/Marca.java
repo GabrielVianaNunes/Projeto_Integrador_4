@@ -4,8 +4,8 @@
  */
 package com.mycompany.pi4.entity;
 
-
 public class Marca {
+
     private int idMarca;
     private String nome;
 
@@ -14,6 +14,7 @@ public class Marca {
         this.nome = nome;
     }
 
+    // Getters e setters
     public int getIdMarca() {
         return idMarca;
     }
@@ -28,13 +29,5 @@ public class Marca {
 
     public void setNome(String nome) {
         this.nome = nome;
-    }
-
-    @Override
-    public String toString() {
-        return "Marca { " +
-                "idMarca=" + idMarca +
-                ", nome='" + nome + '\'' +
-                '}';
     }
 }

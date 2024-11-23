@@ -4,29 +4,33 @@
  */
 package com.mycompany.pi4.entity;
 
-public abstract class Cliente {
+public class Cliente {
+
     private int idCliente;
     private String nome;
     private String telefone;
     private String email;
     private String endereco;
-    private String logradouro;
-    private String rua;
     private String cep;
-    private String setor;
+    private String logradouro;
+    private String tipoCliente; // "PF" ou "PJ"
+    private String cpf; // Apenas para PF
+    private String cnpj; // Apenas para PJ
 
-    public Cliente(int idCliente, String nome, String telefone, String email, String endereco, String logradouro, String rua, String cep, String setor) {
+    public Cliente(int idCliente, String nome, String telefone, String email, String endereco, String cep, String logradouro, String tipoCliente, String cpf, String cnpj) {
         this.idCliente = idCliente;
         this.nome = nome;
         this.telefone = telefone;
         this.email = email;
         this.endereco = endereco;
-        this.logradouro = logradouro;
-        this.rua = rua;
         this.cep = cep;
-        this.setor = setor;
+        this.logradouro = logradouro;
+        this.tipoCliente = tipoCliente;
+        this.cpf = cpf;
+        this.cnpj = cnpj;
     }
 
+    // Getters e setters
     public int getIdCliente() {
         return idCliente;
     }
@@ -67,22 +71,6 @@ public abstract class Cliente {
         this.endereco = endereco;
     }
 
-    public String getLogradouro() {
-        return logradouro;
-    }
-
-    public void setLogradouro(String logradouro) {
-        this.logradouro = logradouro;
-    }
-
-    public String getRua() {
-        return rua;
-    }
-
-    public void setRua(String rua) {
-        this.rua = rua;
-    }
-
     public String getCep() {
         return cep;
     }
@@ -91,13 +79,35 @@ public abstract class Cliente {
         this.cep = cep;
     }
 
-    public String getSetor() {
-        return setor;
+    public String getLogradouro() {
+        return logradouro;
     }
 
-    public void setSetor(String setor) {
-        this.setor = setor;
+    public void setLogradouro(String logradouro) {
+        this.logradouro = logradouro;
     }
 
-    public abstract String getTipoCliente();
+    public String getTipoCliente() {
+        return tipoCliente;
+    }
+
+    public void setTipoCliente(String tipoCliente) {
+        this.tipoCliente = tipoCliente;
+    }
+
+    public String getCpf() {
+        return cpf;
+    }
+
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
+    }
+
+    public String getCnpj() {
+        return cnpj;
+    }
+
+    public void setCnpj(String cnpj) {
+        this.cnpj = cnpj;
+    }
 }

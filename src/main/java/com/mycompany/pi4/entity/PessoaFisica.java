@@ -6,19 +6,18 @@ package com.mycompany.pi4.entity;
 
 
 public class PessoaFisica extends Cliente {
-    private String cpf;
 
-    public PessoaFisica(int idCliente, String nome, String telefone, String email, String endereco, String logradouro, String rua, String cep, String setor, String cpf) {
-        super(idCliente, nome, telefone, email, endereco, logradouro, rua, cep, setor);
-        this.cpf = cpf;
+    public PessoaFisica(int idCliente, String nome, String telefone, String email, String endereco, String cep, String logradouro, String cpf) {
+        super(idCliente, nome, telefone, email, endereco, cep, logradouro, "PF", cpf, null); // "PF" para tipoCliente e null para cnpj
     }
 
+    // Mantemos os métodos para facilitar acessos específicos
     public String getCpf() {
-        return cpf;
+        return super.getCpf();
     }
 
     public void setCpf(String cpf) {
-        this.cpf = cpf;
+        super.setCpf(cpf);
     }
 
     @Override

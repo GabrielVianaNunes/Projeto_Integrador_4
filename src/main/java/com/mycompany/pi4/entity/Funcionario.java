@@ -4,18 +4,17 @@
  */
 package com.mycompany.pi4.entity;
 
-
 public class Funcionario {
+
     private int idFuncionario;
     private String nome;
-    private String cargo;
 
-    public Funcionario(int idFuncionario, String nome, String cargo) {
+    public Funcionario(int idFuncionario, String nome) {
         this.idFuncionario = idFuncionario;
         this.nome = nome;
-        this.cargo = cargo;
     }
 
+    // Getters e setters
     public int getIdFuncionario() {
         return idFuncionario;
     }
@@ -30,22 +29,5 @@ public class Funcionario {
 
     public void setNome(String nome) {
         this.nome = nome;
-    }
-
-    public String getCargo() {
-        return cargo;
-    }
-
-    public void setCargo(String cargo) {
-        this.cargo = cargo;
-    }
-
-    @Override
-    public String toString() {
-        return "Funcionario { " +
-                "idFuncionario=" + idFuncionario +
-                ", nome='" + nome + '\'' +
-                ", cargo='" + cargo + '\'' +
-                '}';
     }
 }

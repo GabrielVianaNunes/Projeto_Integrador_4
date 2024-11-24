@@ -6,6 +6,7 @@ package com.mycompany.pi4;
 
 import com.mycompany.pi4.util.DatabaseConnection;
 import com.mycompany.pi4.view.MenuPrincipalView;
+import com.mycompany.pi4.view.CadastroClienteView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +30,17 @@ public class Main {
         // Inicializar a interface gráfica
         java.awt.EventQueue.invokeLater(() -> {
             logger.info("Inicializando a interface gráfica...");
-            new MenuPrincipalView().setVisible(true);
+            
+            // Opção para abrir a tela principal ou diretamente o CadastroClienteView
+            boolean abrirCadastroCliente = true; // Alterne para false para abrir o MenuPrincipalView
+
+            if (abrirCadastroCliente) {
+                logger.info("Abrindo a janela de cadastro de cliente...");
+                new CadastroClienteView().setVisible(true);
+            } else {
+                logger.info("Abrindo a janela principal...");
+                new MenuPrincipalView().setVisible(true);
+            }
         });
     }
 

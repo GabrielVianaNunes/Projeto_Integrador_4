@@ -104,11 +104,4 @@ public class CadastroOSView extends JFrame {
         add(mainPanel);
     }
 
-    // Método principal para testar a interface
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            CadastroOSView view = new CadastroOSView();
-            view.setVisible(true);
-        });
-    }
 }

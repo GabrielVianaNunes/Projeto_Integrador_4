@@ -16,6 +16,9 @@ public class Cliente {
     private String tipoCliente; // "PF" ou "PJ"
     private String cpf; // Apenas para PF
     private String cnpj; // Apenas para PJ
+    
+    public Cliente() {
+    }
 
     public Cliente(int idCliente, String nome, String telefone, String email, String endereco, String cep, String logradouro, String tipoCliente, String cpf, String cnpj) {
         this.idCliente = idCliente;

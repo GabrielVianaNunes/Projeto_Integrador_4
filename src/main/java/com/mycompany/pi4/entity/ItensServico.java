@@ -13,6 +13,9 @@ public class ItensServico {
     private Funcionario funcionario;
     private int quantidade;
     private double precoUnitario;
+    
+    public ItensServico() {
+    }
 
     public ItensServico(int idItemServico, OrdemServico ordemServico, Servico servico, Funcionario funcionario, int quantidade, double precoUnitario) {
         this.idItemServico = idItemServico;

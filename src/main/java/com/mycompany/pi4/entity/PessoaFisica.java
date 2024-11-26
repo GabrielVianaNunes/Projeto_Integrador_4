@@ -10,6 +10,9 @@ public class PessoaFisica extends Cliente {
     public PessoaFisica(int idCliente, String nome, String telefone, String email, String endereco, String cep, String logradouro, String cpf) {
         super(idCliente, nome, telefone, email, endereco, cep, logradouro, "PF", cpf, null); // "PF" para tipoCliente e null para cnpj
     }
+    
+    public PessoaFisica() {
+    }
 
     // Mantemos os métodos para facilitar acessos específicos
     public String getCpf() {

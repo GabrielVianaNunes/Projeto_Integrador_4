@@ -9,6 +9,9 @@ public class Modelo {
     private int idModelo;
     private String nome;
     private Marca marca;
+    
+    public Modelo() {
+    }
 
     public Modelo(int idModelo, String nome, Marca marca) {
         this.idModelo = idModelo;

@@ -8,6 +8,9 @@ public class Funcionario {
 
     private int idFuncionario;
     private String nome;
+    
+    public Funcionario() {
+    }
 
     public Funcionario(int idFuncionario, String nome) {
         this.idFuncionario = idFuncionario;

@@ -4,10 +4,7 @@
  */
 package com.mycompany.pi4.entity;
 
-import java.util.List;
-
 public class Veiculo {
-
     private int idVeiculo;
     private String placa;
     private int ano;
@@ -15,6 +12,11 @@ public class Veiculo {
     private Cliente cliente;
     private Modelo modelo;
 
+    // Construtor vazio
+    public Veiculo() {
+    }
+
+    // Construtor completo
     public Veiculo(int idVeiculo, String placa, int ano, int quilometragem, Cliente cliente, Modelo modelo) {
         this.idVeiculo = idVeiculo;
         this.placa = placa;
@@ -24,7 +26,7 @@ public class Veiculo {
         this.modelo = modelo;
     }
 
-    // Getters e setters
+    // Getters e Setters
     public int getIdVeiculo() {
         return idVeiculo;
     }

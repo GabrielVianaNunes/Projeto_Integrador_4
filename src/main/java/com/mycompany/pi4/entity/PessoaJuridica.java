@@ -8,6 +8,9 @@ package com.mycompany.pi4.entity;
 public class PessoaJuridica extends Cliente {
     private String inscricaoEstadual;
     private String contato;
+    
+    public PessoaJuridica() {
+    }
 
     public PessoaJuridica(int idCliente, String nome, String telefone, String email, String endereco, String cep, String logradouro, String cnpj, String inscricaoEstadual, String contato) {
         super(idCliente, nome, telefone, email, endereco, cep, logradouro, "PJ", null, cnpj); // "PJ" para tipoCliente e null para cpf

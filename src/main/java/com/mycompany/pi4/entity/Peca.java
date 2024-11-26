@@ -10,6 +10,9 @@ public class Peca {
     private String descricao;
     private int quantidade;
     private double precoUnitario;
+    
+    public Peca() {
+    }
 
     public Peca(int idPeca, String descricao, int quantidade, double precoUnitario) {
         this.idPeca = idPeca;

@@ -9,6 +9,9 @@ public class Servico {
     private int idServico;
     private String descricao;
     private double precoUnitario;
+    
+    public Servico() {
+    }
 
     public Servico(int idServico, String descricao, double precoUnitario) {
         this.idServico = idServico;

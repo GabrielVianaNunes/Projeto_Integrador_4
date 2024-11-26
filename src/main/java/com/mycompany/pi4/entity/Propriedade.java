@@ -12,6 +12,9 @@ public class Propriedade {
     private Veiculo veiculo;
     private Date dataInicio;
     private Date dataFim;
+    
+    public Propriedade() {
+    }
 
     public Propriedade(int idPropriedade, Cliente cliente, Veiculo veiculo, Date dataInicio, Date dataFim) {
         this.idPropriedade = idPropriedade;

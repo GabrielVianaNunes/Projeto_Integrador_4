@@ -8,6 +8,9 @@ public class Marca {
 
     private int idMarca;
     private String nome;
+    
+    public Marca() {
+    }
 
     public Marca(int idMarca, String nome) {
         this.idMarca = idMarca;

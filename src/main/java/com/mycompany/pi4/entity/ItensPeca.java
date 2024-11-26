@@ -11,6 +11,9 @@ public class ItensPeca {
     private Peca peca;
     private int quantidade;
     private double precoUnitario;
+    
+    public ItensPeca() {
+    }
 
     public ItensPeca(int idItemPeca, OrdemServico ordemServico, Peca peca, int quantidade, double precoUnitario) {
         this.idItemPeca = idItemPeca;

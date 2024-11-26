@@ -14,6 +14,9 @@ public class OrdemServico {
     private String status;
     private double valorTotal;
     private Veiculo veiculo;
+    
+    public OrdemServico() {
+    }
 
     public OrdemServico(int idOS, Date dataInicio, Date dataFim, String status, double valorTotal, Veiculo veiculo) {
         this.idOS = idOS;

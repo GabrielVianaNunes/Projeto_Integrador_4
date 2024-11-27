@@ -61,6 +61,36 @@ public class ModeloController {
 
         return modelo;
     }
+    
+    // Método para listar todos os modelos associados a uma marca específica
+    public List<Modelo> listarModelosPorMarca(int idMarca) {
+        List<Modelo> modelos = new ArrayList<>();
+        String sql = "SELECT * FROM modelo WHERE idmarca = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, idMarca);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Modelo modelo = new Modelo();
+                    modelo.setIdModelo(rs.getInt("idmodelo"));
+                    modelo.setNome(rs.getString("nome"));
+
+                    // Associa a marca ao modelo
+                    MarcaController marcaController = new MarcaController(connection);
+                    modelo.setMarca(marcaController.buscarMarcaPorId(idMarca));
+
+                    modelos.add(modelo);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Erro ao listar modelos por marca: " + e.getMessage());
+        }
+
+        return modelos;
+    }
+
 
 
     // Método para listar todos os modelos

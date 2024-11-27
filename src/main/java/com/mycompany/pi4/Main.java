@@ -10,39 +10,28 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException {
         // Configuração inicial
         logger.info("Iniciando o sistema AutoGyn...");
 
         // Testar a conexão com o banco de dados
-        if (testarConexaoBanco()) {
-            logger.info("Conexão com o banco de dados bem-sucedida.");
-        } else {
+        Connection connection = DatabaseConnection.getConnection();
+        if (connection == null) {
             logger.error("Erro ao conectar ao banco de dados. Verifique as configurações.");
             System.exit(1); // Encerra o programa se o banco não estiver acessível
+        } else {
+            logger.info("Conexão com o banco de dados bem-sucedida.");
         }
 
         // Inicializar a interface gráfica
         java.awt.EventQueue.invokeLater(() -> {
             logger.info("Inicializando a interface gráfica...");
-            new MenuPrincipalView().setVisible(true);
+            new MenuPrincipalView(connection).setVisible(true); // Passa a conexão para a tela principal
         });
-    }
-
-    /**
-     * Testa a conexão com o banco de dados para garantir que o sistema está funcional.
-     * @return true se a conexão for bem-sucedida, false caso contrário.
-     */
-    private static boolean testarConexaoBanco() {
-        try (Connection connection = DatabaseConnection.getConnection()) {
-            return connection != null && !connection.isClosed();
-        } catch (Exception e) {
-            logger.error("Erro ao testar conexão com o banco de dados: {}", e.getMessage());
-            return false;
-        }
     }
 }

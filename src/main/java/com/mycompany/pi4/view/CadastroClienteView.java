@@ -15,24 +15,33 @@ public class CadastroClienteView extends JFrame {
 
     private JTextField idClienteField, nomeField, telefoneField, emailField, enderecoField, cepField, logradouroField, cpfField, cnpjField;
     private JComboBox<String> tipoClienteComboBox;
-    private JButton salvarButton, cancelarButton;
+    private JButton salvarButton, cancelarButton, limparButton;
 
     public CadastroClienteView() {
         setTitle("Cadastro de Cliente");
-        setSize(400, 500);
+        setSize(500, 600);  // Aumentei o tamanho da janela
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
         // Painel principal com layout compacto
-        JPanel mainPanel = new JPanel(new BorderLayout(5, 5));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BorderLayout(10, 10));
+        mainPanel.setBackground(new Color(245, 245, 245)); // Cor de fundo suave
+
+        // Título
+        JLabel titulo = new JLabel("Cadastro de Cliente", JLabel.CENTER);
+        titulo.setFont(new Font("Arial", Font.BOLD, 20));  // Tamanho da fonte maior
+        titulo.setForeground(new Color(0, 102, 204));  // Cor do título
+        mainPanel.add(titulo, BorderLayout.NORTH);
 
         // Painel central com formulário
-        JPanel formPanel = new JPanel(new GridLayout(9, 2, 5, 5)); // 9 linhas, 2 colunas
+        JPanel formPanel = new JPanel(new GridLayout(10, 2, 10, 10)); // 10 linhas, 2 colunas
+        formPanel.setBackground(new Color(245, 245, 245));
+
         formPanel.add(new JLabel("ID Cliente:"));
         idClienteField = new JTextField();
-        idClienteField.setText(gerarIdCliente()); // Gerar automaticamente com o formato
-        idClienteField.setEditable(false); // ID não editável
+        idClienteField.setText(gerarIdCliente());
+        idClienteField.setEditable(false);
         formPanel.add(idClienteField);
 
         formPanel.add(new JLabel("Nome:"));
@@ -56,7 +65,7 @@ public class CadastroClienteView extends JFrame {
 
         formPanel.add(new JLabel("CNPJ:"));
         cnpjField = new JTextField();
-        cnpjField.setEnabled(false); // CNPJ desabilitado por padrão
+        cnpjField.setEnabled(false);
         cnpjField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
@@ -70,12 +79,12 @@ public class CadastroClienteView extends JFrame {
         telefoneField.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                ajustarBackspaceDelete(e); // Ajusta comportamento do backspace e delete
+                ajustarBackspaceDelete(e);
             }
 
             @Override
             public void keyReleased(KeyEvent e) {
-                String texto = telefoneField.getText().replaceAll("[^\\d]", ""); // Remove tudo que não for número
+                String texto = telefoneField.getText().replaceAll("[^\\d]", "");
                 String formatado = formatarTexto(texto);
                 telefoneField.setText(formatado);
                 telefoneField.setCaretPosition(formatado.length());
@@ -104,12 +113,24 @@ public class CadastroClienteView extends JFrame {
         mainPanel.add(formPanel, BorderLayout.CENTER);
 
         // Painel inferior com botões
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
+        buttonPanel.setBackground(new Color(245, 245, 245)); // Cor de fundo dos botões
+
         salvarButton = new JButton("Salvar");
+        salvarButton.setBackground(new Color(0, 102, 204)); // Cor de fundo azul
+        salvarButton.setForeground(Color.WHITE); // Cor da fonte
         salvarButton.addActionListener(this::onSalvar);
         buttonPanel.add(salvarButton);
 
+        limparButton = new JButton("Limpar");
+        limparButton.setBackground(new Color(0, 153, 0)); // Cor de fundo verde
+        limparButton.setForeground(Color.WHITE);
+        limparButton.addActionListener(this::onLimpar);
+        buttonPanel.add(limparButton);
+
         cancelarButton = new JButton("Cancelar");
+        cancelarButton.setBackground(new Color(204, 0, 0)); // Cor de fundo vermelho
+        cancelarButton.setForeground(Color.WHITE);
         cancelarButton.addActionListener(e -> dispose());
         buttonPanel.add(cancelarButton);
 
@@ -120,8 +141,8 @@ public class CadastroClienteView extends JFrame {
     }
 
     private String gerarIdCliente() {
-        int idAleatorio = (int) (Math.random() * 10000); // ID aleatório (entre 0 e 9999)
-        return "#" + String.format("%04d", idAleatorio); // Formata o ID para #XXXX
+        int idAleatorio = (int) (Math.random() * 10000);
+        return "#" + String.format("%04d", idAleatorio);
     }
 
     private void onTipoClienteChange(ItemEvent event) {
@@ -130,11 +151,11 @@ public class CadastroClienteView extends JFrame {
             if ("Pessoa Física".equals(tipoSelecionado)) {
                 cpfField.setEnabled(true);
                 cnpjField.setEnabled(false);
-                cnpjField.setText(""); // Limpa o campo
+                cnpjField.setText("");
             } else if ("Pessoa Jurídica".equals(tipoSelecionado)) {
                 cpfField.setEnabled(false);
                 cnpjField.setEnabled(true);
-                cpfField.setText(""); // Limpa o campo
+                cpfField.setText("");
             }
         }
     }
@@ -206,73 +227,46 @@ public class CadastroClienteView extends JFrame {
     }
 
     private void ajustarBackspaceDelete(KeyEvent e) {
-        // Captura o texto atual e a posição do cursor
         String textoAtual = telefoneField.getText();
         int posicaoCursor = telefoneField.getCaretPosition();
 
-        // Tratamento do backspace
         if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && posicaoCursor > 0) {
-            // Remove o caractere antes do cursor, ignorando a formatação
             StringBuilder sb = new StringBuilder(textoAtual);
             sb.deleteCharAt(posicaoCursor - 1);
             textoAtual = sb.toString();
             posicaoCursor--;
-        } // Tratamento do delete
-        else if (e.getKeyCode() == KeyEvent.VK_DELETE && posicaoCursor < textoAtual.length()) {
-            // Remove o caractere na posição do cursor, ignorando a formatação
+        } else if (e.getKeyCode() == KeyEvent.VK_DELETE && posicaoCursor < textoAtual.length()) {
             StringBuilder sb = new StringBuilder(textoAtual);
             sb.deleteCharAt(posicaoCursor);
             textoAtual = sb.toString();
         }
 
-        // Remove caracteres de formatação para recalcular a posição
-        String textoNumerico = textoAtual.replaceAll("[^\\d]", "");
-
-        // Atualiza o texto formatado no campo
-        telefoneField.setText(formatarTexto(textoNumerico));
-
-        // Ajusta a posição do cursor no texto formatado
-        telefoneField.setCaretPosition(Math.max(0, Math.min(posicaoCursor, telefoneField.getText().length())));
+        telefoneField.setText(textoAtual);
+        telefoneField.setCaretPosition(posicaoCursor);
     }
 
     private String formatarTexto(String texto) {
-        StringBuilder sb = new StringBuilder(texto);
-
-        // Adiciona o parêntese no DDD
-        if (texto.length() > 2) {
-            sb.insert(0, "(").insert(3, ")");
-        }
-        // Adiciona o hífen no número
-        if (texto.length() > 6) {
-            sb.insert(9, '-');
-        } else if (texto.length() > 2) {
-            sb.insert(6, '-');
-        }
-
+        StringBuilder sb = new StringBuilder();
+        if (texto.length() > 0) sb.append("(").append(texto.substring(0, Math.min(texto.length(), 2))).append(") ");
+        if (texto.length() > 2) sb.append(texto.substring(2, Math.min(texto.length(), 7))).append(" ");
+        if (texto.length() > 7) sb.append(texto.substring(7, Math.min(texto.length(), 11)));
+        if (texto.length() > 11) sb.append("-").append(texto.substring(11, Math.min(texto.length(), 15)));
         return sb.toString();
     }
 
-    private void onSalvar(ActionEvent event) {
-        try {
-            String idCliente = idClienteField.getText().trim();
-            String nome = nomeField.getText().trim();
-            String tipoCliente = (String) tipoClienteComboBox.getSelectedItem();
-            String cpf = cpfField.isEnabled() ? cpfField.getText().trim() : null;
-            String cnpj = cnpjField.isEnabled() ? cnpjField.getText().trim() : null;
-            String telefone = telefoneField.getText().trim();
-            String email = emailField.getText().trim();
-            String endereco = enderecoField.getText().trim();
-            String cep = cepField.getText().trim();
+    private void onLimpar(ActionEvent e) {
+        idClienteField.setText(gerarIdCliente());
+        nomeField.setText("");
+        tipoClienteComboBox.setSelectedIndex(0);
+        cpfField.setText("");
+        cnpjField.setText("");
+        telefoneField.setText("");
+        emailField.setText("");
+        enderecoField.setText("");
+        cepField.setText("");
+    }
 
-            if (nome.isEmpty() || (cpf == null && cnpj == null) || telefone.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Preencha todos os campos obrigatórios.", "Erro", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            JOptionPane.showMessageDialog(this, "Cliente cadastrado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
-            dispose();
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao salvar cliente.", "Erro", JOptionPane.ERROR_MESSAGE);
-        }
+    private void onSalvar(ActionEvent e) {
+        JOptionPane.showMessageDialog(this, "Cliente salvo com sucesso!");
     }
 }

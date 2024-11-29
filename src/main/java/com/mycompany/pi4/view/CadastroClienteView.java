@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.pi4.view;
 
 import javax.swing.*;
@@ -13,34 +9,29 @@ import java.awt.event.KeyEvent;
 
 public class CadastroClienteView extends JFrame {
 
-    private JTextField idClienteField, nomeField, telefoneField, emailField, enderecoField, cepField, logradouroField, cpfField, cnpjField;
+    private JTextField idClienteField, nomeField, telefoneField, emailField, enderecoField, cepField, cpfField, cnpjField;
     private JComboBox<String> tipoClienteComboBox;
     private JButton salvarButton, cancelarButton, limparButton;
 
     public CadastroClienteView() {
         setTitle("Cadastro de Cliente");
-        setSize(500, 600);  // Aumentei o tamanho da janela
+        setSize(500, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Painel principal com layout compacto
-        JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new BorderLayout(10, 10));
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBackground(new Color(245, 245, 245)); // Cor de fundo suave
 
-        // Título
         JLabel titulo = new JLabel("Cadastro de Cliente", JLabel.CENTER);
-        titulo.setFont(new Font("Arial", Font.BOLD, 20));  // Tamanho da fonte maior
-        titulo.setForeground(new Color(0, 102, 204));  // Cor do título
+        titulo.setFont(new Font("Arial", Font.BOLD, 20));
+        titulo.setForeground(new Color(0, 102, 204));
         mainPanel.add(titulo, BorderLayout.NORTH);
 
-        // Painel central com formulário
-        JPanel formPanel = new JPanel(new GridLayout(10, 2, 10, 10)); // 10 linhas, 2 colunas
+        JPanel formPanel = new JPanel(new GridLayout(10, 2, 10, 10));
         formPanel.setBackground(new Color(245, 245, 245));
 
         formPanel.add(new JLabel("ID Cliente:"));
         idClienteField = new JTextField();
-        idClienteField.setText(gerarIdCliente());
         idClienteField.setEditable(false);
         formPanel.add(idClienteField);
 
@@ -66,12 +57,6 @@ public class CadastroClienteView extends JFrame {
         formPanel.add(new JLabel("CNPJ:"));
         cnpjField = new JTextField();
         cnpjField.setEnabled(false);
-        cnpjField.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                formatarCNPJ();
-            }
-        });
         formPanel.add(cnpjField);
 
         formPanel.add(new JLabel("Telefone:"));
@@ -85,6 +70,9 @@ public class CadastroClienteView extends JFrame {
             @Override
             public void keyReleased(KeyEvent e) {
                 String texto = telefoneField.getText().replaceAll("[^\\d]", "");
+                if (texto.length() > 11) {
+                    texto = texto.substring(0, 11);
+                }
                 String formatado = formatarTexto(texto);
                 telefoneField.setText(formatado);
                 telefoneField.setCaretPosition(formatado.length());
@@ -112,37 +100,29 @@ public class CadastroClienteView extends JFrame {
 
         mainPanel.add(formPanel, BorderLayout.CENTER);
 
-        // Painel inferior com botões
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
-        buttonPanel.setBackground(new Color(245, 245, 245)); // Cor de fundo dos botões
+        buttonPanel.setBackground(new Color(245, 245, 245));
 
         salvarButton = new JButton("Salvar");
-        salvarButton.setBackground(new Color(0, 102, 204)); // Cor de fundo azul
-        salvarButton.setForeground(Color.WHITE); // Cor da fonte
+        salvarButton.setBackground(new Color(0, 102, 204));
+        salvarButton.setForeground(Color.WHITE);
         salvarButton.addActionListener(this::onSalvar);
         buttonPanel.add(salvarButton);
 
         limparButton = new JButton("Limpar");
-        limparButton.setBackground(new Color(0, 153, 0)); // Cor de fundo verde
+        limparButton.setBackground(new Color(0, 153, 0));
         limparButton.setForeground(Color.WHITE);
         limparButton.addActionListener(this::onLimpar);
         buttonPanel.add(limparButton);
 
         cancelarButton = new JButton("Cancelar");
-        cancelarButton.setBackground(new Color(204, 0, 0)); // Cor de fundo vermelho
+        cancelarButton.setBackground(new Color(204, 0, 0));
         cancelarButton.setForeground(Color.WHITE);
         cancelarButton.addActionListener(e -> dispose());
         buttonPanel.add(cancelarButton);
 
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
-
-        // Adicionar painel principal à janela
         add(mainPanel);
-    }
-
-    private String gerarIdCliente() {
-        int idAleatorio = (int) (Math.random() * 10000);
-        return "#" + String.format("%04d", idAleatorio);
     }
 
     private void onTipoClienteChange(ItemEvent event) {
@@ -180,34 +160,6 @@ public class CadastroClienteView extends JFrame {
         }
     }
 
-    private void formatarCNPJ() {
-        String texto = cnpjField.getText().replaceAll("[^\\d]", "");
-
-        if (texto.length() > 14) {
-            texto = texto.substring(0, 14);
-        }
-
-        StringBuilder sb = new StringBuilder(texto);
-
-        if (texto.length() > 12) {
-            sb.insert(12, '-');
-        }
-        if (texto.length() > 8) {
-            sb.insert(8, '/');
-        }
-        if (texto.length() > 6) {
-            sb.insert(6, '.');
-        }
-        if (texto.length() > 2) {
-            sb.insert(2, '.');
-        }
-
-        if (!sb.toString().equals(cnpjField.getText())) {
-            cnpjField.setText(sb.toString());
-            cnpjField.setCaretPosition(sb.length());
-        }
-    }
-
     private void formatarCEP() {
         String texto = cepField.getText().replaceAll("[^\\d]", "");
 
@@ -227,35 +179,30 @@ public class CadastroClienteView extends JFrame {
     }
 
     private void ajustarBackspaceDelete(KeyEvent e) {
-        String textoAtual = telefoneField.getText();
+        String textoAtual = telefoneField.getText().replaceAll("[^\\d]", "");
         int posicaoCursor = telefoneField.getCaretPosition();
 
         if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && posicaoCursor > 0) {
-            StringBuilder sb = new StringBuilder(textoAtual);
-            sb.deleteCharAt(posicaoCursor - 1);
-            textoAtual = sb.toString();
-            posicaoCursor--;
-        } else if (e.getKeyCode() == KeyEvent.VK_DELETE && posicaoCursor < textoAtual.length()) {
-            StringBuilder sb = new StringBuilder(textoAtual);
-            sb.deleteCharAt(posicaoCursor);
-            textoAtual = sb.toString();
+            if (textoAtual.length() > 0) {
+                textoAtual = textoAtual.substring(0, textoAtual.length() - 1);
+            }
         }
 
-        telefoneField.setText(textoAtual);
-        telefoneField.setCaretPosition(posicaoCursor);
+        String formatado = formatarTexto(textoAtual);
+        telefoneField.setText(formatado);
+        telefoneField.setCaretPosition(formatado.length());
     }
 
     private String formatarTexto(String texto) {
         StringBuilder sb = new StringBuilder();
         if (texto.length() > 0) sb.append("(").append(texto.substring(0, Math.min(texto.length(), 2))).append(") ");
-        if (texto.length() > 2) sb.append(texto.substring(2, Math.min(texto.length(), 7))).append(" ");
-        if (texto.length() > 7) sb.append(texto.substring(7, Math.min(texto.length(), 11)));
-        if (texto.length() > 11) sb.append("-").append(texto.substring(11, Math.min(texto.length(), 15)));
+        if (texto.length() > 2) sb.append(texto.substring(2, Math.min(texto.length(), 7))).append("-");
+        if (texto.length() > 7) sb.append(texto.substring(7));
         return sb.toString();
     }
 
     private void onLimpar(ActionEvent e) {
-        idClienteField.setText(gerarIdCliente());
+        idClienteField.setText("");
         nomeField.setText("");
         tipoClienteComboBox.setSelectedIndex(0);
         cpfField.setText("");

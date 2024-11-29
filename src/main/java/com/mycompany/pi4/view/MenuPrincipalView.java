@@ -61,7 +61,7 @@ public class MenuPrincipalView extends JFrame {
         });
 
         cadastroOSButton.addActionListener(e -> {
-            CadastroOSView cadastroOSView = new CadastroOSView(funcionarioController, estoqueController, servicoController); // Passando FuncionarioController, EstoqueController e ServicoController
+            CadastroOSView cadastroOSView = new CadastroOSView(funcionarioController, estoqueController, servicoController, clienteController);
             cadastroOSView.setVisible(true);
         });
 

@@ -1,15 +1,20 @@
 package com.mycompany.pi4.view;
 
+import com.mycompany.pi4.controllers.ClienteController;
+import com.mycompany.pi4.entity.Cliente;
+import com.mycompany.pi4.util.DatabaseConnection;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public class CadastroClienteView extends JFrame {
 
-    private JTextField idClienteField, nomeField, telefoneField, emailField, enderecoField, cepField, cpfField, cnpjField;
+    private JTextField idClienteField, nomeField, telefoneField, emailField, enderecoField, cepField, cpfField, cnpjField, logradouroField;
     private JComboBox<String> tipoClienteComboBox;
     private JButton salvarButton, cancelarButton, limparButton;
 
@@ -87,6 +92,10 @@ public class CadastroClienteView extends JFrame {
         formPanel.add(new JLabel("Endereço:"));
         enderecoField = new JTextField();
         formPanel.add(enderecoField);
+        
+        formPanel.add(new JLabel("Logradouro:"));
+        logradouroField = new JTextField(); // Novo campo para logradouro
+        formPanel.add(logradouroField);
 
         formPanel.add(new JLabel("CEP:"));
         cepField = new JTextField();
@@ -214,6 +223,31 @@ public class CadastroClienteView extends JFrame {
     }
 
     private void onSalvar(ActionEvent e) {
-        JOptionPane.showMessageDialog(this, "Cliente salvo com sucesso!");
+        Cliente cliente = new Cliente();
+        cliente.setNome(nomeField.getText());
+        cliente.setTelefone(telefoneField.getText());
+        cliente.setEmail(emailField.getText());
+        cliente.setEndereco(enderecoField.getText());
+        cliente.setLogradouro(logradouroField.getText()); // Captura o valor do novo campo
+        cliente.setCep(cepField.getText());
+        cliente.setTipoCliente((String) tipoClienteComboBox.getSelectedItem());
+        cliente.setCpf(cpfField.getText());
+        cliente.setCnpj(cnpjField.getText());
+
+        try (Connection connection = DatabaseConnection.getConnection()) {
+            ClienteController clienteController = new ClienteController(connection);
+            clienteController.cadastrarCliente(cliente);
+
+            if (cliente.getIdCliente() > 0) {
+                idClienteField.setText(String.valueOf(cliente.getIdCliente()));
+                JOptionPane.showMessageDialog(this, "Cliente cadastrado com sucesso! ID: " + cliente.getIdCliente());
+            } else {
+                JOptionPane.showMessageDialog(this, "Erro ao cadastrar cliente.");
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Erro ao conectar ao banco de dados: " + ex.getMessage());
+        }
     }
+
+
 }

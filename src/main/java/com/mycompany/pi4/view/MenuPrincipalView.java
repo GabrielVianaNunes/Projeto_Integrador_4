@@ -23,7 +23,7 @@ public class MenuPrincipalView extends JFrame {
 
     public MenuPrincipalView(Connection connection) {
         setTitle("Menu Principal");
-        setSize(400, 300);
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 

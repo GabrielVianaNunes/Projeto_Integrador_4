@@ -162,4 +162,44 @@ public class ClienteController {
         if (cep == null) return null;
         return cep.replaceAll("[^\\d]", ""); // Remove traços
     }
+    
+    public List<Cliente> buscarClientesPorNome(String nome) {
+        List<Cliente> clientes = new ArrayList<>();
+        String sql = "SELECT * FROM cliente WHERE LOWER(nome) LIKE ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            // Adiciona o caractere '%' para busca parcial
+            stmt.setString(1, "%" + nome.toLowerCase() + "%");
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Cliente cliente = null;
+                    String tipo = rs.getString("tipoCliente");
+                    if ("PF".equalsIgnoreCase(tipo)) {
+                        cliente = new PessoaFisica();
+                        ((PessoaFisica) cliente).setCpf(rs.getString("cpf"));
+                    } else if ("PJ".equalsIgnoreCase(tipo)) {
+                        cliente = new PessoaJuridica();
+                        ((PessoaJuridica) cliente).setCnpj(rs.getString("cnpj"));
+                    }
+
+                    cliente.setIdCliente(rs.getInt("idcliente"));
+                    cliente.setNome(rs.getString("nome"));
+                    cliente.setTelefone(rs.getString("telefone"));
+                    cliente.setEmail(rs.getString("email"));
+                    cliente.setEndereco(rs.getString("endereco"));
+                    cliente.setLogradouro(rs.getString("logradouro"));
+                    cliente.setCep(rs.getString("cep"));
+
+                    clientes.add(cliente);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Erro ao buscar clientes por nome: " + e.getMessage());
+        }
+
+        return clientes;
+    }
+
 }

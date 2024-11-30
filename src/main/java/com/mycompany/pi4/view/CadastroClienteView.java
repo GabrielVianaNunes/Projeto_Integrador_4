@@ -20,7 +20,7 @@ public class CadastroClienteView extends JFrame {
 
     public CadastroClienteView() {
         setTitle("Cadastro de Cliente");
-        setSize(500, 600);
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 

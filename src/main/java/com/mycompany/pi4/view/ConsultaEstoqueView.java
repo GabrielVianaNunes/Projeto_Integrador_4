@@ -18,7 +18,7 @@ public class ConsultaEstoqueView extends JFrame {
         this.estoqueController = estoqueController;
 
         setTitle("Consulta de Estoque");
-        setSize(600, 400);
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 

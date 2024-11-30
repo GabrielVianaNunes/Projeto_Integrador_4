@@ -31,7 +31,7 @@ public class CadastroVeiculoView extends JFrame {
         this.marcaController = marcaController;
 
         setTitle("Cadastro de Veículo");
-        setSize(600, 400);
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 

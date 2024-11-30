@@ -21,7 +21,7 @@ public class CadastroServicoView extends JFrame {
         this.servicoController = servicoController;
 
         setTitle("Gerenciamento de Serviços");
-        setSize(600, 400);
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 

@@ -12,8 +12,8 @@ public class DatabaseConnection {
     private static final Logger logger = LoggerFactory.getLogger(DatabaseConnection.class);
 
     // Configurações do banco de dados PostgreSQL
-    private static final String URL = "seu URL"; // Substitua pelo seu URL
-    private static final String USER = "seu user"; // Substitua pelo seu usuário
+    private static final String URL = "sua URL"; // Substitua pelo seu URL
+    private static final String USER = "seu usuário"; // Substitua pelo seu usuário
     private static final String PASSWORD = "sua senha"; // Substitua pela sua senha
 
 

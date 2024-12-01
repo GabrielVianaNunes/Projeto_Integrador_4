@@ -10,6 +10,9 @@ import com.mycompany.pi4.controllers.ServicoController;
 import com.mycompany.pi4.controllers.OrdemServicoController;
 
 import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.sql.Connection;
 
 public class MenuPrincipalView extends JFrame {
@@ -20,12 +23,20 @@ public class MenuPrincipalView extends JFrame {
     private MarcaController marcaController;
     private FuncionarioController funcionarioController;
     private EstoqueController estoqueController;
-    private ServicoController servicoController; 
+    private ServicoController servicoController;
     private OrdemServicoController ordemServicoController;
+
+    // Botões para ajuste de tamanho
+    private JButton cadastroClienteButton;
+    private JButton cadastroVeiculoButton;
+    private JButton consultaEstoqueButton;
+    private JButton cadastroOSButton;
+    private JButton cadastroServicoButton;
+    private JButton listarOSButton;
 
     public MenuPrincipalView(Connection connection) {
         setTitle("Menu Principal");
-        setSize(800, 600);
+        setSize(600, 400); // Tamanho inicial correto
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
@@ -35,28 +46,52 @@ public class MenuPrincipalView extends JFrame {
         this.clienteController = new ClienteController(connection);
         this.veiculoController = new VeiculoController(connection);
         this.funcionarioController = new FuncionarioController(connection);
-        this.estoqueController = new EstoqueController(connection); 
-        this.servicoController = new ServicoController(connection); 
+        this.estoqueController = new EstoqueController(connection);
+        this.servicoController = new ServicoController(connection);
         this.ordemServicoController = new OrdemServicoController(veiculoController);
 
+        // Painel principal para organizar os botões verticalmente
         JPanel panel = new JPanel();
-        JButton cadastroClienteButton = new JButton("Cadastro de Cliente");
-        JButton cadastroVeiculoButton = new JButton("Cadastro de Veículo");
-        JButton consultaEstoqueButton = new JButton("Consulta de Estoque");
-        JButton cadastroOSButton = new JButton("Cadastro de OS");
-        JButton cadastroServicoButton = new JButton("Cadastro de Serviço"); // Novo botão para cadastro de serviço
-        JButton listarOSButton = new JButton("Listar OS");
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS)); // Define layout vertical
 
+        // Inicializar botões
+        cadastroClienteButton = new JButton("Cadastro de Cliente");
+        cadastroVeiculoButton = new JButton("Cadastro de Veículo");
+        consultaEstoqueButton = new JButton("Consulta de Estoque");
+        cadastroOSButton = new JButton("Cadastro de OS");
+        cadastroServicoButton = new JButton("Cadastro de Serviço");
+        listarOSButton = new JButton("Listar OS");
 
+        // Alinhamento central dos botões
+        cadastroClienteButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        cadastroVeiculoButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        consultaEstoqueButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        cadastroOSButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        cadastroServicoButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        listarOSButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+        // Adicionar botões ao painel com espaçamento
+        panel.add(cadastroClienteButton);
+        panel.add(Box.createRigidArea(new Dimension(0, 10))); // Espaçamento vertical
+        panel.add(cadastroVeiculoButton);
+        panel.add(Box.createRigidArea(new Dimension(0, 10))); // Espaçamento vertical
+        panel.add(consultaEstoqueButton);
+        panel.add(Box.createRigidArea(new Dimension(0, 10))); // Espaçamento vertical
+        panel.add(cadastroOSButton);
+        panel.add(Box.createRigidArea(new Dimension(0, 10))); // Espaçamento vertical
+        panel.add(cadastroServicoButton);
+        panel.add(Box.createRigidArea(new Dimension(0, 10))); // Espaçamento vertical
+        panel.add(listarOSButton);
+
+        // Configuração dos botões
         cadastroClienteButton.addActionListener(e -> new CadastroClienteView().setVisible(true));
 
         cadastroVeiculoButton.addActionListener(e -> {
             CadastroVeiculoView cadastroVeiculoView = new CadastroVeiculoView(
-                veiculoController, 
-                clienteController, 
-                modeloController, 
-                marcaController
+                    veiculoController,
+                    clienteController,
+                    modeloController,
+                    marcaController
             );
             cadastroVeiculoView.setVisible(true);
         });
@@ -75,25 +110,48 @@ public class MenuPrincipalView extends JFrame {
             CadastroServicoView cadastroServicoView = new CadastroServicoView(servicoController); // Passando ServicoController
             cadastroServicoView.setVisible(true);
         });
-        
+
         listarOSButton.addActionListener(e -> {
             ListarOrdemServicoView listarView = new ListarOrdemServicoView(
-                ordemServicoController, 
-                funcionarioController, 
-                estoqueController, 
-                servicoController, 
-                clienteController
+                    ordemServicoController,
+                    funcionarioController,
+                    estoqueController,
+                    servicoController,
+                    clienteController
             );
             listarView.setVisible(true);
         });
 
-
-        panel.add(cadastroClienteButton);
-        panel.add(cadastroVeiculoButton);
-        panel.add(consultaEstoqueButton);
-        panel.add(cadastroServicoButton); 
-        panel.add(listarOSButton);
-
         add(panel);
+
+        // Ajustar tamanho inicial dos botões
+        ajustarTamanhoDosBotoes(false);
+
+        // Listener para ajustar o tamanho dos botões ao redimensionar
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                ajustarTamanhoDosBotoes(isTelaCheia());
+            }
+        });
+    }
+
+    // Método para verificar se a tela está cheia
+    private boolean isTelaCheia() {
+        return getExtendedState() == JFrame.MAXIMIZED_BOTH;
+    }
+
+    // Método ajustado para redimensionar os botões com base no estado da tela
+    private void ajustarTamanhoDosBotoes(boolean telaCheia) {
+        Dimension tamanho = telaCheia ? new Dimension(350, 60) : new Dimension(150, 40); // Tamanhos ajustados
+        JButton[] botoes = {cadastroClienteButton, cadastroVeiculoButton, consultaEstoqueButton, cadastroOSButton, cadastroServicoButton, listarOSButton};
+        for (JButton botao : botoes) {
+            botao.setPreferredSize(tamanho);
+            botao.setMinimumSize(tamanho);
+            botao.setMaximumSize(tamanho);
+            botao.revalidate();
+        }
+        revalidate();
+        repaint();
     }
 }

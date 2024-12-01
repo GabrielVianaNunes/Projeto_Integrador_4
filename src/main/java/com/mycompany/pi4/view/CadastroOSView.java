@@ -6,6 +6,8 @@ import com.mycompany.pi4.controllers.FuncionarioController;
 import com.mycompany.pi4.controllers.ServicoController;
 import com.mycompany.pi4.entity.Cliente;
 import com.mycompany.pi4.entity.Funcionario;
+import com.mycompany.pi4.entity.ItensServico;
+import com.mycompany.pi4.entity.OrdemServico;
 import com.mycompany.pi4.entity.Peca;
 import com.mycompany.pi4.entity.Servico;
 
@@ -16,11 +18,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CadastroOSView extends JFrame {
-    private JTextField veiculoField, descricaoField, statusField, dataField;
+    private JTextField veiculoField, descricaoField, statusField, dataField, totalField;
     private JTable itensServicoTable, itensPecaTable;
     private JComboBox<Funcionario> tecnicoComboBox;
     private JButton adicionarServicoButton, excluirServicoButton, adicionarPecaButton, excluirPecaButton, salvarButton, cancelarButton, novoFuncionarioButton;
-
+    
     private FuncionarioController funcionarioController;
     private EstoqueController estoqueController;
     private ServicoController servicoController;
@@ -34,187 +36,236 @@ public class CadastroOSView extends JFrame {
     private JButton buscarButton;
 
     public CadastroOSView(FuncionarioController funcionarioController, EstoqueController estoqueController, ServicoController servicoController, ClienteController clienteController) {
-    this.funcionarioController = funcionarioController;
-    this.estoqueController = estoqueController;
-    this.servicoController = servicoController;
-    this.clienteController = clienteController;
-    this.pecasParaAtualizar = new ArrayList<>();
+        this.funcionarioController = funcionarioController;
+        this.estoqueController = estoqueController;
+        this.servicoController = servicoController;
+        this.clienteController = clienteController;
+        this.pecasParaAtualizar = new ArrayList<>();
 
-    setTitle("Cadastro de Ordem de Serviço");
-    setSize(900, 700);
-    setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-    setLocationRelativeTo(null);
+        setTitle("Cadastro de Ordem de Serviço");
+        setSize(900, 700);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null);
 
-    // Layout principal
-    JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-    mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        // Layout principal
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
-    // Painel de busca no topo (ajustado para ocupar menos espaço)
-    JPanel searchPanel = new JPanel(new GridLayout(1, 3, 10, 10)); // Apenas uma linha agora
-    searchPanel.setBorder(BorderFactory.createTitledBorder("Buscar Cliente"));
+        // Painel de busca no topo (ajustado para ocupar menos espaço)
+        JPanel searchPanel = new JPanel(new GridLayout(1, 3, 10, 10));
+        searchPanel.setBorder(BorderFactory.createTitledBorder("Buscar Cliente"));
 
-    buscaNomeField = new JTextField();
-    searchPanel.add(new JLabel("Nome:"));
-    searchPanel.add(buscaNomeField);
+        buscaNomeField = new JTextField();
+        searchPanel.add(new JLabel("Nome:"));
+        searchPanel.add(buscaNomeField);
 
-    buscaCpfCnpjField = new JTextField();
-    searchPanel.add(new JLabel("CPF/CNPJ:"));
-    searchPanel.add(buscaCpfCnpjField);
+        buscaCpfCnpjField = new JTextField();
+        searchPanel.add(new JLabel("CPF/CNPJ:"));
+        searchPanel.add(buscaCpfCnpjField);
 
-    buscarButton = new JButton("Buscar");
-    buscarButton.addActionListener(e -> buscarCliente());
-    searchPanel.add(buscarButton);
+        buscarButton = new JButton("Buscar");
+        buscarButton.addActionListener(e -> buscarCliente());
+        searchPanel.add(buscarButton);
 
-    // Painel de informações gerais
-    JPanel infoPanel = new JPanel(new GridLayout(8, 2, 10, 10));
-    infoPanel.setBorder(BorderFactory.createTitledBorder("Informações Gerais"));
+        // Painel de informações gerais
+        JPanel infoPanel = new JPanel(new GridLayout(8, 2, 10, 10));
+        infoPanel.setBorder(BorderFactory.createTitledBorder("Informações Gerais"));
 
-    clienteComboBox = new JComboBox<>();
-    clienteComboBox.addActionListener(e -> preencherCamposCliente());
-    infoPanel.add(new JLabel("Cliente:"));
-    infoPanel.add(clienteComboBox);
+        clienteComboBox = new JComboBox<>();
+        clienteComboBox.addActionListener(e -> preencherCamposCliente());
+        infoPanel.add(new JLabel("Cliente:"));
+        infoPanel.add(clienteComboBox);
 
-    nomeField = new JTextField();
-    nomeField.setEditable(false);
-    infoPanel.add(new JLabel("Nome:"));
-    infoPanel.add(nomeField);
+        nomeField = new JTextField();
+        nomeField.setEditable(false);
+        infoPanel.add(new JLabel("Nome:"));
+        infoPanel.add(nomeField);
 
-    cpfField = new JTextField();
-    cpfField.setEditable(false);
-    infoPanel.add(new JLabel("CPF:"));
-    infoPanel.add(cpfField);
+        cpfField = new JTextField();
+        cpfField.setEditable(false);
+        infoPanel.add(new JLabel("CPF:"));
+        infoPanel.add(cpfField);
 
-    cnpjField = new JTextField();
-    cnpjField.setEditable(false);
-    infoPanel.add(new JLabel("CNPJ:"));
-    infoPanel.add(cnpjField);
+        cnpjField = new JTextField();
+        cnpjField.setEditable(false);
+        infoPanel.add(new JLabel("CNPJ:"));
+        infoPanel.add(cnpjField);
 
-    telefoneField = new JTextField();
-    telefoneField.setEditable(false);
-    infoPanel.add(new JLabel("Telefone:"));
-    infoPanel.add(telefoneField);
+        telefoneField = new JTextField();
+        telefoneField.setEditable(false);
+        infoPanel.add(new JLabel("Telefone:"));
+        infoPanel.add(telefoneField);
 
-    emailField = new JTextField();
-    emailField.setEditable(false);
-    infoPanel.add(new JLabel("Email:"));
-    infoPanel.add(emailField);
+        emailField = new JTextField();
+        emailField.setEditable(false);
+        infoPanel.add(new JLabel("Email:"));
+        infoPanel.add(emailField);
 
-    enderecoField = new JTextField();
-    enderecoField.setEditable(false);
-    infoPanel.add(new JLabel("Endereço:"));
-    infoPanel.add(enderecoField);
+        enderecoField = new JTextField();
+        enderecoField.setEditable(false);
+        infoPanel.add(new JLabel("Endereço:"));
+        infoPanel.add(enderecoField);
 
-    cepField = new JTextField();
-    cepField.setEditable(false);
-    infoPanel.add(new JLabel("CEP:"));
-    infoPanel.add(cepField);
+        cepField = new JTextField();
+        cepField.setEditable(false);
+        infoPanel.add(new JLabel("CEP:"));
+        infoPanel.add(cepField);
 
-    veiculoField = new JTextField();
-    infoPanel.add(new JLabel("Veículo (Placa):"));
-    infoPanel.add(veiculoField);
+        veiculoField = new JTextField();
+        infoPanel.add(new JLabel("Veículo (Placa):"));
+        infoPanel.add(veiculoField);
 
-    descricaoField = new JTextField();
-    infoPanel.add(new JLabel("Descrição:"));
-    infoPanel.add(descricaoField);
+        descricaoField = new JTextField();
+        infoPanel.add(new JLabel("Descrição:"));
+        infoPanel.add(descricaoField);
 
-    JPanel tecnicoPanel = new JPanel(new BorderLayout());
-    tecnicoComboBox = new JComboBox<>();
-    carregarFuncionarios();
-    tecnicoPanel.add(tecnicoComboBox, BorderLayout.CENTER);
+        JPanel tecnicoPanel = new JPanel(new BorderLayout());
+        tecnicoComboBox = new JComboBox<>();
+        carregarFuncionarios();
+        tecnicoPanel.add(tecnicoComboBox, BorderLayout.CENTER);
 
-    novoFuncionarioButton = new JButton("+");
-    novoFuncionarioButton.addActionListener(e -> cadastrarNovoFuncionario());
-    tecnicoPanel.add(novoFuncionarioButton, BorderLayout.EAST);
+        novoFuncionarioButton = new JButton("+");
+        novoFuncionarioButton.addActionListener(e -> cadastrarNovoFuncionario());
+        tecnicoPanel.add(novoFuncionarioButton, BorderLayout.EAST);
 
-    infoPanel.add(new JLabel("Técnico:"));
-    infoPanel.add(tecnicoPanel);
+        infoPanel.add(new JLabel("Técnico:"));
+        infoPanel.add(tecnicoPanel);
 
-    statusField = new JTextField("Aberta");
-    infoPanel.add(new JLabel("Status:"));
-    infoPanel.add(statusField);
+        statusField = new JTextField("Aberta");
+        infoPanel.add(new JLabel("Status:"));
+        infoPanel.add(statusField);
 
-    dataField = new JTextField();
-    infoPanel.add(new JLabel("Data:"));
-    infoPanel.add(dataField);
+        dataField = new JTextField();
+        infoPanel.add(new JLabel("Data:"));
+        infoPanel.add(dataField);
 
-    // Painel intermediário para empilhar searchPanel e infoPanel
-    JPanel topPanel = new JPanel();
-    topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
-    topPanel.add(searchPanel);
-    topPanel.add(infoPanel);
+        // Painel intermediário para empilhar searchPanel e infoPanel
+        JPanel topPanel = new JPanel();
+        topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
+        topPanel.add(searchPanel);
+        topPanel.add(infoPanel);
 
-    // Adicionar o painel intermediário ao topo do mainPanel
-    mainPanel.add(topPanel, BorderLayout.NORTH);
+        // Adicionar o painel intermediário ao topo do mainPanel
+        mainPanel.add(topPanel, BorderLayout.NORTH);
 
-    // Painel Central: Tabelas de Itens (com ajustes para mais espaço)
-    JPanel itensPanel = new JPanel(new BorderLayout(10, 10));
-    itensPanel.setBorder(BorderFactory.createTitledBorder("Itens da O.S."));
+        // Painel Central: Tabelas de Itens (com ajustes para mais espaço)
+        JPanel itensPanel = new JPanel(new BorderLayout(10, 10));
+        itensPanel.setBorder(BorderFactory.createTitledBorder("Itens da O.S."));
 
-    // Painel de Serviços
-    JPanel servicoPanel = new JPanel(new BorderLayout(10, 10));
-    servicoPanel.setBorder(BorderFactory.createTitledBorder("Serviços"));
+        // Painel de Serviços
+        JPanel servicoPanel = new JPanel(new BorderLayout(10, 10));
+        servicoPanel.setBorder(BorderFactory.createTitledBorder("Serviços"));
 
-    itensServicoTable = new JTable(new DefaultTableModel(new Object[][]{}, new String[]{"Descrição", "Quantidade", "Preço Unitário", "Subtotal"}));
-    JScrollPane servicoScrollPane = new JScrollPane(itensServicoTable);
-    servicoScrollPane.setPreferredSize(new Dimension(850, 200)); // Ajuste de altura
-    servicoPanel.add(servicoScrollPane, BorderLayout.CENTER);
+        DefaultTableModel servicoModel = new DefaultTableModel(new Object[][]{}, new String[]{"Descrição", "Quantidade", "Preço Unitário", "Subtotal"}) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Torna todas as células da tabela de serviços não editáveis
+            }
+        };
+        itensServicoTable = new JTable(servicoModel);
+        JScrollPane servicoScrollPane = new JScrollPane(itensServicoTable);
+        servicoPanel.add(servicoScrollPane, BorderLayout.CENTER);
 
-    JPanel servicoButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-    adicionarServicoButton = new JButton("Adicionar Serviço");
-    adicionarServicoButton.addActionListener(e -> adicionarServico());
-    excluirServicoButton = new JButton("Excluir Serviço");
-    excluirServicoButton.addActionListener(e -> excluirServico());
-    servicoButtonsPanel.add(adicionarServicoButton);
-    servicoButtonsPanel.add(excluirServicoButton);
+        JPanel servicoButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        adicionarServicoButton = new JButton("Adicionar Serviço");
+        adicionarServicoButton.addActionListener(e -> adicionarServico());
+        excluirServicoButton = new JButton("Excluir Serviço");
+        excluirServicoButton.addActionListener(e -> excluirServico());
+        servicoButtonsPanel.add(adicionarServicoButton);
+        servicoButtonsPanel.add(excluirServicoButton);
 
-    servicoPanel.add(servicoButtonsPanel, BorderLayout.SOUTH);
+        servicoPanel.add(servicoButtonsPanel, BorderLayout.SOUTH);
 
-    // Painel de Peças
-    JPanel pecaPanel = new JPanel(new BorderLayout(10, 10));
-    pecaPanel.setBorder(BorderFactory.createTitledBorder("Peças"));
+        // Painel de Peças
+        JPanel pecaPanel = new JPanel(new BorderLayout(10, 10));
+        pecaPanel.setBorder(BorderFactory.createTitledBorder("Peças"));
 
-    itensPecaTable = new JTable(new DefaultTableModel(new Object[][]{}, new String[]{"ID", "Descrição", "Quantidade", "Preço Unitário", "Subtotal"}));
-    JScrollPane pecaScrollPane = new JScrollPane(itensPecaTable);
-    pecaScrollPane.setPreferredSize(new Dimension(850, 200)); // Ajuste de altura
-    pecaPanel.add(pecaScrollPane, BorderLayout.CENTER);
+        DefaultTableModel pecaModel = new DefaultTableModel(new Object[][]{}, new String[]{"ID", "Descrição", "Quantidade", "Preço Unitário", "Subtotal"}) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false; // Torna todas as células da tabela de peças não editáveis
+            }
+        };
+        itensPecaTable = new JTable(pecaModel);
+        JScrollPane pecaScrollPane = new JScrollPane(itensPecaTable);
+        pecaPanel.add(pecaScrollPane, BorderLayout.CENTER);
 
-    JPanel pecaButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-    adicionarPecaButton = new JButton("Adicionar Peça");
-    adicionarPecaButton.addActionListener(e -> adicionarPeca());
-    excluirPecaButton = new JButton("Excluir Peça");
-    excluirPecaButton.addActionListener(e -> excluirPeca());
-    pecaButtonsPanel.add(adicionarPecaButton);
-    pecaButtonsPanel.add(excluirPecaButton);
+        JPanel pecaButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        adicionarPecaButton = new JButton("Adicionar Peça");
+        adicionarPecaButton.addActionListener(e -> adicionarPeca());
+        excluirPecaButton = new JButton("Excluir Peça");
+        excluirPecaButton.addActionListener(e -> excluirPeca());
+        pecaButtonsPanel.add(adicionarPecaButton);
+        pecaButtonsPanel.add(excluirPecaButton);
 
-    pecaPanel.add(pecaButtonsPanel, BorderLayout.SOUTH);
+        pecaPanel.add(pecaButtonsPanel, BorderLayout.SOUTH);
 
-    // Divisor Dinâmico
-    JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, servicoPanel, pecaPanel);
-    splitPane.setOneTouchExpandable(true); // Adiciona controles para expandir/retrair
-    splitPane.setDividerLocation(350); // Define a posição inicial do divisor
-    splitPane.setResizeWeight(0.5); // Prioriza a divisão igual entre os painéis
-    splitPane.setContinuousLayout(true); // Suaviza o redimensionamento
-    itensPanel.add(splitPane, BorderLayout.CENTER);
+        JSplitPane splitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, servicoPanel, pecaPanel);
+        splitPane.setOneTouchExpandable(true);
+        splitPane.setDividerLocation(350);
+        splitPane.setResizeWeight(0.5);
+        itensPanel.add(splitPane, BorderLayout.CENTER);
 
-    // Adicionar o painel de itens ao centro do mainPanel
-    mainPanel.add(itensPanel, BorderLayout.CENTER);
+        mainPanel.add(itensPanel, BorderLayout.CENTER);
 
-    // Painel Inferior: Botões de Ação
-    JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        // Painel Inferior
+        JPanel bottomPanel = new JPanel(new BorderLayout());
 
-    salvarButton = new JButton("Salvar");
-    salvarButton.addActionListener(e -> salvarOS());
-    actionPanel.add(salvarButton);
+        JPanel totalPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        totalPanel.add(new JLabel("Total (R$):"));
+        totalField = new JTextField(10);
+        totalField.setEditable(false);
+        totalPanel.add(totalField);
+        bottomPanel.add(totalPanel, BorderLayout.NORTH);
 
-    cancelarButton = new JButton("Cancelar");
-    cancelarButton.addActionListener(e -> dispose());
-    actionPanel.add(cancelarButton);
+        JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        salvarButton = new JButton("Salvar");
+        salvarButton.addActionListener(e -> salvarOS());
+        cancelarButton = new JButton("Cancelar");
+        cancelarButton.addActionListener(e -> dispose());
+        actionPanel.add(salvarButton);
+        actionPanel.add(cancelarButton);
+        bottomPanel.add(actionPanel, BorderLayout.SOUTH);
 
-    mainPanel.add(actionPanel, BorderLayout.SOUTH);
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
 
-    // Adiciona o painel principal à janela
-    add(mainPanel);
-}
+        add(mainPanel);
+    }
+    
+    public CadastroOSView(
+        FuncionarioController funcionarioController,
+        EstoqueController estoqueController,
+        ServicoController servicoController,
+        ClienteController clienteController,
+        OrdemServico os
+    ) {
+        this(funcionarioController, estoqueController, servicoController, clienteController);
+
+        // Preenche os campos com a O.S passada como argumento
+        if (os != null) {
+            preencherCamposComOS(os);
+        }
+    }
+    
+    private void atualizarTotal() {
+        double total = 0;
+
+        // Soma dos subtotais da tabela de serviços
+        DefaultTableModel servicoModel = (DefaultTableModel) itensServicoTable.getModel();
+        for (int i = 0; i < servicoModel.getRowCount(); i++) {
+            total += (double) servicoModel.getValueAt(i, 3); // Subtotal na coluna 3
+        }
+
+        // Soma dos subtotais da tabela de peças
+        DefaultTableModel pecaModel = (DefaultTableModel) itensPecaTable.getModel();
+        for (int i = 0; i < pecaModel.getRowCount(); i++) {
+            total += (double) pecaModel.getValueAt(i, 4); // Subtotal na coluna 4
+        }
+
+        // Atualiza o texto do JTextField totalField
+        totalField.setText(String.format("Total: R$ %.2f", total));
+    }
+
 
 
     private void carregarFuncionarios() {
@@ -281,12 +332,54 @@ public class CadastroOSView extends JFrame {
         Cliente clienteSelecionado = (Cliente) clienteComboBox.getSelectedItem();
         if (clienteSelecionado != null) {
             nomeField.setText(clienteSelecionado.getNome());
-            cpfField.setText(clienteSelecionado.getCpf() != null ? clienteSelecionado.getCpf() : "");
-            cnpjField.setText(clienteSelecionado.getCnpj() != null ? clienteSelecionado.getCnpj() : "");
+            cpfField.setText(clienteSelecionado.getCpf());
+            cnpjField.setText(clienteSelecionado.getCnpj());
             telefoneField.setText(clienteSelecionado.getTelefone());
             emailField.setText(clienteSelecionado.getEmail());
             enderecoField.setText(clienteSelecionado.getEndereco());
             cepField.setText(clienteSelecionado.getCep());
+        }
+    }
+    
+    private void preencherCamposComOS(OrdemServico os) {
+        // Preenche campos básicos
+        veiculoField.setText(os.getVeiculo() != null ? 
+            os.getVeiculo().getIdVeiculo() + " - " + os.getVeiculo().getModelo() : ""); // Preenche veículo
+        descricaoField.setText(os.getStatus() != null ? os.getStatus() : "");
+        statusField.setText(os.getStatus() != null ? os.getStatus() : "");
+        dataField.setText(os.getDataInicio() != null ? os.getDataInicio().toString() : ""); // Adapte o formato de data conforme necessário
+        totalField.setText(String.format("R$ %.2f", os.getValorTotal()));
+
+        // Preenche tabela de serviços
+        DefaultTableModel servicoModel = (DefaultTableModel) itensServicoTable.getModel();
+        servicoModel.setRowCount(0); // Limpa a tabela antes de adicionar os dados
+
+        if (os.getItensServico() != null && !os.getItensServico().isEmpty()) {
+            for (ItensServico itemServico : os.getItensServico()) {
+                Servico servico = itemServico.getServico();
+                servicoModel.addRow(new Object[]{
+                    servico.getDescricao(),
+                    itemServico.getQuantidade(),
+                    itemServico.getPrecoUnitario(),
+                    itemServico.getQuantidade() * itemServico.getPrecoUnitario()
+                });
+            }
+        }
+
+        // Preenche tabela de peças
+        DefaultTableModel pecaModel = (DefaultTableModel) itensPecaTable.getModel();
+        pecaModel.setRowCount(0); // Limpa a tabela antes de adicionar os dados
+
+        if (os.getPecas() != null && !os.getPecas().isEmpty()) {
+            for (Peca peca : os.getPecas()) {
+                pecaModel.addRow(new Object[]{
+                    peca.getIdPeca(),
+                    peca.getDescricao(),
+                    peca.getQuantidade(),
+                    peca.getPrecoUnitario(),
+                    peca.getQuantidade() * peca.getPrecoUnitario()
+                });
+            }
         }
     }
     
@@ -301,6 +394,11 @@ public class CadastroOSView extends JFrame {
 
     private void adicionarServico() {
         List<Servico> servicosDisponiveis = servicoController.listarServicos();
+
+        if (servicosDisponiveis.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Nenhum serviço disponível!", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
         String[] opcoes = servicosDisponiveis.stream()
                 .map(servico -> servico.getIdServico() + " - " + servico.getDescricao() + " (R$ " + servico.getPrecoUnitario() + ")")
@@ -317,22 +415,32 @@ public class CadastroOSView extends JFrame {
         );
 
         if (selecionada != null && selecionada.contains(" - ")) {
-            int idServico = Integer.parseInt(selecionada.split(" - ")[0]);
-            Servico servico = servicoController.consultarServicoPorId(idServico);
+            try {
+                int idServico = Integer.parseInt(selecionada.split(" - ")[0]);
+                Servico servico = servicoController.consultarServicoPorId(idServico);
 
-            if (servico != null) {
-                int quantidade = Integer.parseInt(JOptionPane.showInputDialog(this, "Digite a quantidade:"));
-                double subtotal = quantidade * servico.getPrecoUnitario();
-                DefaultTableModel model = (DefaultTableModel) itensServicoTable.getModel();
-                model.addRow(new Object[]{
-                        servico.getDescricao(),
-                        quantidade,
-                        servico.getPrecoUnitario(),
-                        subtotal
-                });
+                if (servico != null) {
+                    int quantidade = Integer.parseInt(JOptionPane.showInputDialog(this, "Digite a quantidade:"));
+                    if (quantidade <= 0) {
+                        JOptionPane.showMessageDialog(this, "Quantidade inválida!", "Erro", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    double subtotal = quantidade * servico.getPrecoUnitario();
+                    DefaultTableModel model = (DefaultTableModel) itensServicoTable.getModel();
+                    model.addRow(new Object[]{
+                            servico.getDescricao(),
+                            quantidade,
+                            servico.getPrecoUnitario(),
+                            subtotal
+                    });
+                    atualizarTotal();
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Entrada inválida!", "Erro", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
+
 
     private void excluirServico() {
         DefaultTableModel model = (DefaultTableModel) itensServicoTable.getModel();
@@ -340,6 +448,7 @@ public class CadastroOSView extends JFrame {
 
         if (selectedRow != -1) {
             model.removeRow(selectedRow);
+            atualizarTotal();
         } else {
             JOptionPane.showMessageDialog(this, "Selecione um serviço para excluir.", "Aviso", JOptionPane.WARNING_MESSAGE);
         }
@@ -351,6 +460,7 @@ public class CadastroOSView extends JFrame {
 
         if (selectedRow != -1) {
             model.removeRow(selectedRow);
+            atualizarTotal(); // Atualiza o total após excluir a peça
         } else {
             JOptionPane.showMessageDialog(this, "Selecione uma peça para excluir.", "Aviso", JOptionPane.WARNING_MESSAGE);
         }
@@ -358,6 +468,11 @@ public class CadastroOSView extends JFrame {
 
     private void adicionarPeca() {
         List<Peca> pecasDisponiveis = estoqueController.listarPecas();
+
+        if (pecasDisponiveis.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Nenhuma peça disponível!", "Aviso", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
 
         String[] opcoes = pecasDisponiveis.stream()
                 .map(peca -> peca.getIdPeca() + " - " + peca.getDescricao() + " (Qtd: " + peca.getQuantidade() + ")")
@@ -374,31 +489,44 @@ public class CadastroOSView extends JFrame {
         );
 
         if (selecionada != null) {
-            int idPeca = Integer.parseInt(selecionada.split(" - ")[0]);
-            Peca peca = estoqueController.consultarPecaPorId(idPeca);
+            try {
+                int idPeca = Integer.parseInt(selecionada.split(" - ")[0]);
+                Peca peca = estoqueController.consultarPecaPorId(idPeca);
 
-            if (peca != null) {
-                int quantidadeDesejada = Integer.parseInt(JOptionPane.showInputDialog(this, "Digite a quantidade:"));
+                if (peca != null) {
+                    int quantidadeDesejada = Integer.parseInt(JOptionPane.showInputDialog(this, "Digite a quantidade:"));
 
-                if (estoqueController.verificarDisponibilidade(idPeca, quantidadeDesejada)) {
-                    double subtotal = quantidadeDesejada * peca.getPrecoUnitario();
-                    DefaultTableModel model = (DefaultTableModel) itensPecaTable.getModel();
-                    model.addRow(new Object[]{
-                            peca.getIdPeca(),
-                            peca.getDescricao(),
-                            quantidadeDesejada,
-                            peca.getPrecoUnitario(),
-                            subtotal
-                    });
+                    if (quantidadeDesejada <= 0) {
+                        JOptionPane.showMessageDialog(this, "Quantidade inválida!", "Erro", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
 
-                    Peca pecaParaAtualizar = new Peca(peca.getIdPeca(), peca.getDescricao(), quantidadeDesejada, peca.getPrecoUnitario());
-                    pecasParaAtualizar.add(pecaParaAtualizar);
-                } else {
-                    JOptionPane.showMessageDialog(this, "Quantidade insuficiente no estoque!", "Erro", JOptionPane.ERROR_MESSAGE);
+                    if (estoqueController.verificarDisponibilidade(idPeca, quantidadeDesejada)) {
+                        double subtotal = quantidadeDesejada * peca.getPrecoUnitario();
+                        DefaultTableModel model = (DefaultTableModel) itensPecaTable.getModel();
+                        model.addRow(new Object[]{
+                                peca.getIdPeca(),
+                                peca.getDescricao(),
+                                quantidadeDesejada,
+                                peca.getPrecoUnitario(),
+                                subtotal
+                        });
+
+                        Peca pecaParaAtualizar = new Peca(peca.getIdPeca(), peca.getDescricao(), quantidadeDesejada, peca.getPrecoUnitario());
+                        pecasParaAtualizar.add(pecaParaAtualizar);
+
+                        atualizarTotal();
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Quantidade insuficiente no estoque!", "Erro", JOptionPane.ERROR_MESSAGE);
+                    }
                 }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Entrada inválida!", "Erro", JOptionPane.ERROR_MESSAGE);
             }
         }
     }
+
+
 
     private void salvarOS() {
         try {

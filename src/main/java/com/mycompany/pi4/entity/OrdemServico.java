@@ -1,10 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.pi4.entity;
 
 import java.util.Date;
+import java.util.List;
 
 public class OrdemServico {
 
@@ -14,17 +11,21 @@ public class OrdemServico {
     private String status;
     private double valorTotal;
     private Veiculo veiculo;
-    
+    private List<ItensServico> itensServico; // Lista de ItensServico
+    private List<Peca> pecas; // Lista de peças
+
     public OrdemServico() {
     }
 
-    public OrdemServico(int idOS, Date dataInicio, Date dataFim, String status, double valorTotal, Veiculo veiculo) {
+    public OrdemServico(int idOS, Date dataInicio, Date dataFim, String status, double valorTotal, Veiculo veiculo, List<ItensServico> itensServico, List<Peca> pecas) {
         this.idOS = idOS;
         this.dataInicio = dataInicio;
         this.dataFim = dataFim;
         this.status = status;
         this.valorTotal = valorTotal;
         this.veiculo = veiculo;
+        this.itensServico = itensServico;
+        this.pecas = pecas;
     }
 
     // Getters e setters
@@ -74,5 +75,21 @@ public class OrdemServico {
 
     public void setVeiculo(Veiculo veiculo) {
         this.veiculo = veiculo;
+    }
+
+    public List<ItensServico> getItensServico() {
+        return itensServico;
+    }
+
+    public void setItensServico(List<ItensServico> itensServico) {
+        this.itensServico = itensServico;
+    }
+
+    public List<Peca> getPecas() {
+        return pecas;
+    }
+
+    public void setPecas(List<Peca> pecas) {
+        this.pecas = pecas;
     }
 }

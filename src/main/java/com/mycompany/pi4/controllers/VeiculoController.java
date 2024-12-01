@@ -94,4 +94,33 @@ public class VeiculoController {
 
         return veiculos;
     }
+    
+    // Método para buscar veículo por ID no banco de dados
+    public Veiculo consultarVeiculoPorId(int idVeiculo) {
+        String sql = "SELECT * FROM veiculo WHERE idveiculo = ?";
+        Veiculo veiculo = null;
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, idVeiculo);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    veiculo = new Veiculo();
+                    veiculo.setIdVeiculo(rs.getInt("idveiculo"));
+                    veiculo.setPlaca(rs.getString("placa"));
+                    veiculo.setAno(rs.getInt("ano"));
+                    veiculo.setQuilometragem(rs.getInt("quilometragem"));
+                    // Caso precise buscar os relacionamentos
+                    // veiculo.setCliente(clienteController.buscarClientePorId(rs.getInt("idcliente")));
+                    // veiculo.setModelo(modeloController.buscarModeloPorId(rs.getInt("idmodelo")));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Erro ao buscar veículo por ID: " + e.getMessage());
+        }
+
+        return veiculo;
+    }
+    
 }

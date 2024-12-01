@@ -11,6 +11,8 @@ public class OrdemServico {
     private String status;
     private double valorTotal;
     private Veiculo veiculo;
+    private String descricao;
+    private Funcionario funcionario;
     private List<ItensServico> itensServico; // Lista de ItensServico
     private List<Peca> pecas; // Lista de peças
 
@@ -92,4 +94,21 @@ public class OrdemServico {
     public void setPecas(List<Peca> pecas) {
         this.pecas = pecas;
     }
+    
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public void setDescricao(String descricao) {
+        this.descricao = descricao;
+    }
+
+    public Funcionario getFuncionario() {
+        return funcionario;
+    }
+
+    public void setFuncionario(Funcionario funcionario) {
+        this.funcionario = funcionario;
+    }
+    
 }

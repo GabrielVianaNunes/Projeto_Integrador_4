@@ -13,9 +13,8 @@ public class DatabaseConnection {
 
     // Configurações do banco de dados PostgreSQL
     private static final String URL = "sua URL"; // Substitua pelo seu URL
-    private static final String USER = "seu usuário"; // Substitua pelo seu usuário
+    private static final String USER = "seu user"; // Substitua pelo seu usuário
     private static final String PASSWORD = "sua senha"; // Substitua pela sua senha
-
 
     /**
      * Método para obter conexão com o banco de dados.

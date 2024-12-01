@@ -1,9 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.pi4.controllers;
 
+import com.mycompany.pi4.entity.Cliente;
+import com.mycompany.pi4.entity.Modelo;
 import com.mycompany.pi4.entity.Veiculo;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -14,10 +12,14 @@ import java.util.List;
 
 public class VeiculoController {
     private Connection connection; // Conexão com o banco de dados
+    private ClienteController clienteController;
+    private ModeloController modeloController;
 
-    // Construtor para inicializar a conexão
-    public VeiculoController(Connection connection) {
+    // Construtor para inicializar a conexão e os controladores
+    public VeiculoController(Connection connection, ClienteController clienteController, ModeloController modeloController) {
         this.connection = connection;
+        this.clienteController = clienteController;
+        this.modeloController = modeloController;
     }
 
     // Método para cadastrar um novo veículo no banco de dados
@@ -41,7 +43,13 @@ public class VeiculoController {
 
     // Método para buscar veículo por placa no banco de dados
     public Veiculo buscarVeiculoPorPlaca(String placa) {
-        String sql = "SELECT * FROM veiculo WHERE placa = ?";
+        String sql = """
+            SELECT v.*, c.nome AS nomeCliente, m.nome AS nomeModelo
+            FROM Veiculo v
+            JOIN Cliente c ON v.idCliente = c.idCliente
+            JOIN Modelo m ON v.idModelo = m.idModelo
+            WHERE v.placa = ?
+        """;
         Veiculo veiculo = null;
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -50,13 +58,22 @@ public class VeiculoController {
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     veiculo = new Veiculo();
-                    veiculo.setIdVeiculo(rs.getInt("idveiculo"));
+                    veiculo.setIdVeiculo(rs.getInt("idVeiculo"));
                     veiculo.setPlaca(rs.getString("placa"));
                     veiculo.setAno(rs.getInt("ano"));
                     veiculo.setQuilometragem(rs.getInt("quilometragem"));
-                    // Supondo que Cliente e Modelo sejam buscados separadamente:
-                    // veiculo.setCliente(clienteController.buscarClientePorId(rs.getInt("idcliente")));
-                    // veiculo.setModelo(modeloController.buscarModeloPorId(rs.getInt("idmodelo")));
+
+                    // Cliente
+                    Cliente cliente = new Cliente();
+                    cliente.setIdCliente(rs.getInt("idCliente"));
+                    cliente.setNome(rs.getString("nomeCliente"));
+                    veiculo.setCliente(cliente);
+
+                    // Modelo
+                    Modelo modelo = new Modelo();
+                    modelo.setIdModelo(rs.getInt("idModelo"));
+                    modelo.setNome(rs.getString("nomeModelo"));
+                    veiculo.setModelo(modelo);
                 }
             }
         } catch (SQLException e) {
@@ -70,20 +87,34 @@ public class VeiculoController {
     // Método para listar todos os veículos
     public List<Veiculo> listarTodosVeiculos() {
         List<Veiculo> veiculos = new ArrayList<>();
-        String sql = "SELECT * FROM veiculo";
+        String sql = """
+            SELECT v.*, c.nome AS nomeCliente, m.nome AS nomeModelo
+            FROM Veiculo v
+            JOIN Cliente c ON v.idCliente = c.idCliente
+            JOIN Modelo m ON v.idModelo = m.idModelo
+        """;
 
         try (PreparedStatement stmt = connection.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
                 Veiculo veiculo = new Veiculo();
-                veiculo.setIdVeiculo(rs.getInt("idveiculo"));
+                veiculo.setIdVeiculo(rs.getInt("idVeiculo"));
                 veiculo.setPlaca(rs.getString("placa"));
                 veiculo.setAno(rs.getInt("ano"));
                 veiculo.setQuilometragem(rs.getInt("quilometragem"));
-                // Supondo que Cliente e Modelo sejam buscados separadamente:
-                // veiculo.setCliente(clienteController.buscarClientePorId(rs.getInt("idcliente")));
-                // veiculo.setModelo(modeloController.buscarModeloPorId(rs.getInt("idmodelo")));
+
+                // Cliente
+                Cliente cliente = new Cliente();
+                cliente.setIdCliente(rs.getInt("idCliente"));
+                cliente.setNome(rs.getString("nomeCliente"));
+                veiculo.setCliente(cliente);
+
+                // Modelo
+                Modelo modelo = new Modelo();
+                modelo.setIdModelo(rs.getInt("idModelo"));
+                modelo.setNome(rs.getString("nomeModelo"));
+                veiculo.setModelo(modelo);
 
                 veiculos.add(veiculo);
             }
@@ -94,10 +125,16 @@ public class VeiculoController {
 
         return veiculos;
     }
-    
+
     // Método para buscar veículo por ID no banco de dados
     public Veiculo consultarVeiculoPorId(int idVeiculo) {
-        String sql = "SELECT * FROM veiculo WHERE idveiculo = ?";
+        String sql = """
+            SELECT v.*, c.nome AS nomeCliente, m.nome AS nomeModelo
+            FROM Veiculo v
+            JOIN Cliente c ON v.idCliente = c.idCliente
+            JOIN Modelo m ON v.idModelo = m.idModelo
+            WHERE v.idVeiculo = ?
+        """;
         Veiculo veiculo = null;
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -106,13 +143,22 @@ public class VeiculoController {
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     veiculo = new Veiculo();
-                    veiculo.setIdVeiculo(rs.getInt("idveiculo"));
+                    veiculo.setIdVeiculo(rs.getInt("idVeiculo"));
                     veiculo.setPlaca(rs.getString("placa"));
                     veiculo.setAno(rs.getInt("ano"));
                     veiculo.setQuilometragem(rs.getInt("quilometragem"));
-                    // Caso precise buscar os relacionamentos
-                    // veiculo.setCliente(clienteController.buscarClientePorId(rs.getInt("idcliente")));
-                    // veiculo.setModelo(modeloController.buscarModeloPorId(rs.getInt("idmodelo")));
+
+                    // Cliente
+                    Cliente cliente = new Cliente();
+                    cliente.setIdCliente(rs.getInt("idCliente"));
+                    cliente.setNome(rs.getString("nomeCliente"));
+                    veiculo.setCliente(cliente);
+
+                    // Modelo
+                    Modelo modelo = new Modelo();
+                    modelo.setIdModelo(rs.getInt("idModelo"));
+                    modelo.setNome(rs.getString("nomeModelo"));
+                    veiculo.setModelo(modelo);
                 }
             }
         } catch (SQLException e) {
@@ -122,5 +168,4 @@ public class VeiculoController {
 
         return veiculo;
     }
-    
 }

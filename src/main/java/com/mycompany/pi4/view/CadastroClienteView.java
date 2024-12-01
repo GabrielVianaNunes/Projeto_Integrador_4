@@ -3,10 +3,12 @@ package com.mycompany.pi4.view;
 import com.mycompany.pi4.controllers.ClienteController;
 import com.mycompany.pi4.entity.Cliente;
 import com.mycompany.pi4.util.DatabaseConnection;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.sql.Connection;
@@ -42,11 +44,22 @@ public class CadastroClienteView extends JFrame {
 
         formPanel.add(new JLabel("Nome:"));
         nomeField = new JTextField();
+        nomeField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                formatarNome();
+            }
+        });
         formPanel.add(nomeField);
 
         formPanel.add(new JLabel("Tipo Cliente:"));
         tipoClienteComboBox = new JComboBox<>(new String[]{"Pessoa Física", "Pessoa Jurídica"});
-        tipoClienteComboBox.addItemListener(this::onTipoClienteChange);
+        tipoClienteComboBox.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                onTipoClienteChange(e);
+            }
+        });
         formPanel.add(tipoClienteComboBox);
 
         formPanel.add(new JLabel("CPF:"));
@@ -92,7 +105,7 @@ public class CadastroClienteView extends JFrame {
         formPanel.add(new JLabel("Endereço:"));
         enderecoField = new JTextField();
         formPanel.add(enderecoField);
-        
+
         formPanel.add(new JLabel("Logradouro:"));
         logradouroField = new JTextField(); // Novo campo para logradouro
         formPanel.add(logradouroField);
@@ -134,18 +147,15 @@ public class CadastroClienteView extends JFrame {
         add(mainPanel);
     }
 
-    private void onTipoClienteChange(ItemEvent event) {
-        if (event.getStateChange() == ItemEvent.SELECTED) {
-            String tipoSelecionado = (String) tipoClienteComboBox.getSelectedItem();
-            if ("Pessoa Física".equals(tipoSelecionado)) {
-                cpfField.setEnabled(true);
-                cnpjField.setEnabled(false);
-                cnpjField.setText("");
-            } else if ("Pessoa Jurídica".equals(tipoSelecionado)) {
-                cpfField.setEnabled(false);
-                cnpjField.setEnabled(true);
-                cpfField.setText("");
-            }
+    private void formatarNome() {
+        String texto = nomeField.getText();
+        String textoFormatado = texto.replaceAll("[^a-zA-ZáàâãéèêíïóôõöúçñÁÀÂÃÃÉÈÊÍÏÓÔÕÖÚÇÑ\\s]", ""); // Permite letras, acentos, espaços e "ç"
+        textoFormatado = textoFormatado.replaceAll("\\s{2,}", " "); // Substitui múltiplos espaços consecutivos por um único espaço
+
+        // Atualiza o campo apenas se houver alteração
+        if (!textoFormatado.equals(texto)) {
+            nomeField.setText(textoFormatado);
+            nomeField.setCaretPosition(textoFormatado.length()); // Mantém o cursor no final do texto
         }
     }
 
@@ -164,9 +174,7 @@ public class CadastroClienteView extends JFrame {
             sb.insert(3, '.');
         }
 
-        if (!sb.toString().equals(cpfField.getText())) {
-            cpfField.setText(sb.toString());
-        }
+        cpfField.setText(sb.toString());
     }
 
     private void formatarCEP() {
@@ -181,10 +189,8 @@ public class CadastroClienteView extends JFrame {
             sb.insert(5, '-');
         }
 
-        if (!sb.toString().equals(cepField.getText())) {
-            cepField.setText(sb.toString());
-            cepField.setCaretPosition(sb.length());
-        }
+        cepField.setText(sb.toString());
+        cepField.setCaretPosition(sb.length());
     }
 
     private void ajustarBackspaceDelete(KeyEvent e) {
@@ -204,10 +210,31 @@ public class CadastroClienteView extends JFrame {
 
     private String formatarTexto(String texto) {
         StringBuilder sb = new StringBuilder();
-        if (texto.length() > 0) sb.append("(").append(texto.substring(0, Math.min(texto.length(), 2))).append(") ");
-        if (texto.length() > 2) sb.append(texto.substring(2, Math.min(texto.length(), 7))).append("-");
-        if (texto.length() > 7) sb.append(texto.substring(7));
+        if (texto.length() > 0) {
+            sb.append("(").append(texto.substring(0, Math.min(texto.length(), 2))).append(") ");
+        }
+        if (texto.length() > 2) {
+            sb.append(texto.substring(2, Math.min(texto.length(), 7))).append("-");
+        }
+        if (texto.length() > 7) {
+            sb.append(texto.substring(7));
+        }
         return sb.toString();
+    }
+
+    private void onTipoClienteChange(ItemEvent event) {
+        if (event.getStateChange() == ItemEvent.SELECTED) {
+            String tipoSelecionado = (String) tipoClienteComboBox.getSelectedItem();
+            if ("Pessoa Física".equals(tipoSelecionado)) {
+                cpfField.setEnabled(true);
+                cnpjField.setEnabled(false);
+                cnpjField.setText("");
+            } else if ("Pessoa Jurídica".equals(tipoSelecionado)) {
+                cpfField.setEnabled(false);
+                cnpjField.setEnabled(true);
+                cpfField.setText("");
+            }
+        }
     }
 
     private void onLimpar(ActionEvent e) {
@@ -248,6 +275,4 @@ public class CadastroClienteView extends JFrame {
             JOptionPane.showMessageDialog(this, "Erro ao conectar ao banco de dados: " + ex.getMessage());
         }
     }
-
-
 }

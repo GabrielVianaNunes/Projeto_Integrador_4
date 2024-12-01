@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.pi4.view;
 
 import com.mycompany.pi4.controllers.*;
@@ -10,6 +6,7 @@ import com.mycompany.pi4.entity.*;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class CadastroVeiculoView extends JFrame {
     private JTextField placaField, anoField, quilometragemField;
@@ -45,18 +42,21 @@ public class CadastroVeiculoView extends JFrame {
         panel.add(new JLabel("Placa:"), gbc);
         gbc.gridx = 1; gbc.gridwidth = 2;
         placaField = new JTextField();
+        placaField.setInputVerifier(new PlacaInputVerifier());
         panel.add(placaField, gbc);
 
         gbc.gridx = 0; gbc.gridy = 1; gbc.gridwidth = 1;
         panel.add(new JLabel("Ano:"), gbc);
         gbc.gridx = 1; gbc.gridwidth = 2;
         anoField = new JTextField();
+        anoField.setInputVerifier(new AnoInputVerifier()); // Verificador para validar o intervalo de anos
         panel.add(anoField, gbc);
 
         gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 1;
         panel.add(new JLabel("Quilometragem:"), gbc);
         gbc.gridx = 1; gbc.gridwidth = 2;
         quilometragemField = new JTextField();
+        quilometragemField.setInputVerifier(new QuilometragemInputVerifier()); // Verificador para validar a quilometragem
         panel.add(quilometragemField, gbc);
 
         gbc.gridx = 0; gbc.gridy = 3; gbc.gridwidth = 1;
@@ -105,10 +105,9 @@ public class CadastroVeiculoView extends JFrame {
         marcaComboBox.addActionListener(e -> atualizarModelos());
 
         carregarClientes();
-        carregarMarcas(); // Chama carregarMarcas para preencher a marca antes de atualizar modelos
+        carregarMarcas();
     }
 
-    // Método para carregar clientes
     private void carregarClientes() {
         List<Cliente> clientes = clienteController.listarClientes();
         for (Cliente cliente : clientes) {
@@ -116,17 +115,15 @@ public class CadastroVeiculoView extends JFrame {
         }
     }
 
-    // Método para carregar marcas
     private void carregarMarcas() {
         List<Marca> marcas = marcaController.listarMarcas();
         marcaComboBox.removeAllItems();
         for (Marca marca : marcas) {
             marcaComboBox.addItem(marca);
         }
-        atualizarModelos(); // Atualiza os modelos somente após carregar marcas
+        atualizarModelos();
     }
 
-    // Método para atualizar modelos com base na marca selecionada
     private void atualizarModelos() {
         if (modeloComboBox == null) return;
 
@@ -140,18 +137,16 @@ public class CadastroVeiculoView extends JFrame {
         }
     }
 
-    // Método para cadastrar uma nova marca
     private void cadastrarNovaMarca() {
         String nome = JOptionPane.showInputDialog(this, "Digite o nome da nova marca:", "Cadastrar Marca", JOptionPane.PLAIN_MESSAGE);
         if (nome != null && !nome.trim().isEmpty()) {
             Marca novaMarca = new Marca(0, nome.trim());
             marcaController.cadastrarMarca(novaMarca);
-            carregarMarcas(); // Atualiza o comboBox
+            carregarMarcas();
             JOptionPane.showMessageDialog(this, "Nova marca cadastrada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
-    // Método para cadastrar um novo modelo
     private void cadastrarNovoModelo() {
         Marca marcaSelecionada = (Marca) marcaComboBox.getSelectedItem();
         if (marcaSelecionada == null) {
@@ -162,21 +157,32 @@ public class CadastroVeiculoView extends JFrame {
         if (nome != null && !nome.trim().isEmpty()) {
             Modelo novoModelo = new Modelo(0, nome.trim(), marcaSelecionada);
             modeloController.cadastrarModelo(novoModelo);
-            atualizarModelos(); // Atualiza o comboBox
+            atualizarModelos();
             JOptionPane.showMessageDialog(this, "Novo modelo cadastrado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
-    // Método para salvar o veículo
     private void salvarVeiculo() {
         try {
             String placa = placaField.getText();
+            if (!Pattern.matches("^[A-Z]{3}[0-9][A-Z][0-9]{2}$", placa)) {
+                throw new IllegalArgumentException("A placa deve estar no formato LLLNLNN (com letras maiúsculas).");
+            }
+
             int ano = Integer.parseInt(anoField.getText());
+            if (ano < 1920 || ano > 2025) {
+                throw new IllegalArgumentException("O ano deve estar entre 1920 e 2025.");
+            }
+
             int quilometragem = Integer.parseInt(quilometragemField.getText());
+            if (quilometragem < 0 || quilometragem > 1_000_000_000) {
+                throw new IllegalArgumentException("A quilometragem deve estar entre 0 e 1.000.000.000.");
+            }
+
             Cliente cliente = (Cliente) clienteComboBox.getSelectedItem();
             Modelo modelo = (Modelo) modeloComboBox.getSelectedItem();
 
-            if (placa.isEmpty() || cliente == null || modelo == null) {
+            if (cliente == null || modelo == null) {
                 throw new IllegalArgumentException("Todos os campos devem ser preenchidos!");
             }
 
@@ -187,6 +193,54 @@ public class CadastroVeiculoView extends JFrame {
             dispose();
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Erro ao cadastrar veículo: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private static class PlacaInputVerifier extends InputVerifier {
+        private static final Pattern PLACA_PATTERN = Pattern.compile("^[A-Z]{3}[0-9][A-Z][0-9]{2}$");
+
+        @Override
+        public boolean verify(JComponent input) {
+            String text = ((JTextField) input).getText();
+            if (!PLACA_PATTERN.matcher(text).matches()) {
+                JOptionPane.showMessageDialog(input, "A placa deve estar no formato LLLNLNN.", "Formato inválido", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+            return true;
+        }
+    }
+
+    private static class AnoInputVerifier extends InputVerifier {
+        @Override
+        public boolean verify(JComponent input) {
+            try {
+                int ano = Integer.parseInt(((JTextField) input).getText());
+                if (ano < 1920 || ano > 2025) {
+                    JOptionPane.showMessageDialog(input, "O ano deve estar entre 1920 e 2025.", "Ano inválido", JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
+                return true;
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(input, "O ano deve ser um número válido.", "Formato inválido", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+        }
+    }
+
+    private static class QuilometragemInputVerifier extends InputVerifier {
+        @Override
+        public boolean verify(JComponent input) {
+            try {
+                int quilometragem = Integer.parseInt(((JTextField) input).getText());
+                if (quilometragem < 0 || quilometragem > 1_000_000_000) {
+                    JOptionPane.showMessageDialog(input, "A quilometragem deve estar entre 0 e 1.000.000.000.", "Quilometragem inválida", JOptionPane.ERROR_MESSAGE);
+                    return false;
+                }
+                return true;
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(input, "A quilometragem deve ser um número válido.", "Formato inválido", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
         }
     }
 }

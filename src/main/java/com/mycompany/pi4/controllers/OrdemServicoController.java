@@ -13,6 +13,7 @@ import com.mycompany.pi4.util.DatabaseConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,21 +27,28 @@ public class OrdemServicoController {
 
 
     // Criar uma nova ordem de serviço
-    public void criarOrdemServico(OrdemServico os) {
-    String sql = "INSERT INTO OrdemServico (dataInicio, dataFim, status, valorTotal, idVeiculo) VALUES (?, ?, ?, ?, ?)";
+    public int criarOrdemServico(OrdemServico os) {
+        String sql = "INSERT INTO OrdemServico (dataInicio, dataFim, status, valorTotal, idVeiculo) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setDate(1, new java.sql.Date(os.getDataInicio().getTime()));
             stmt.setDate(2, os.getDataFim() != null ? new java.sql.Date(os.getDataFim().getTime()) : null);
             stmt.setString(3, os.getStatus());
             stmt.setDouble(4, os.getValorTotal());
-            stmt.setInt(5, os.getVeiculo().getIdVeiculo()); // Assume que Veiculo possui getIdVeiculo()
+            stmt.setInt(5, os.getVeiculo().getIdVeiculo());
             stmt.executeUpdate();
-            System.out.println("Ordem de serviço criada: " + os.getIdOS());
+
+            // Retornar o ID gerado
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return -1; // Retorna -1 caso algo dê errado
     }
+
 
 
     // Atualizar o status de uma ordem de serviço
@@ -182,6 +190,44 @@ public class OrdemServicoController {
         }
         return null;
     }
-
+    
+    public void atualizarStatusOrdemServico(int idOS, String novoStatus) {
+        String sql = "UPDATE OrdemServico SET status = ? WHERE idOS = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, novoStatus);
+            stmt.setInt(2, idOS);
+            int rowsUpdated = stmt.executeUpdate();
+            if (rowsUpdated > 0) {
+                System.out.println("Status da Ordem de Serviço atualizado para: " + novoStatus);
+            } else {
+                System.out.println("Ordem de Serviço não encontrada!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void atualizarOrdemServico(OrdemServico os) {
+        String sql = "UPDATE OrdemServico SET dataInicio = ?, dataFim = ?, status = ?, valorTotal = ?, idVeiculo = ? WHERE idOS = ?";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setDate(1, new java.sql.Date(os.getDataInicio().getTime()));
+            stmt.setDate(2, os.getDataFim() != null ? new java.sql.Date(os.getDataFim().getTime()) : null);
+            stmt.setString(3, os.getStatus());
+            stmt.setDouble(4, os.getValorTotal());
+            stmt.setInt(5, os.getVeiculo().getIdVeiculo());
+            stmt.setInt(6, os.getIdOS());
+            int rowsUpdated = stmt.executeUpdate();
+            if (rowsUpdated > 0) {
+                System.out.println("Ordem de Serviço atualizada com sucesso!");
+            } else {
+                System.out.println("Nenhuma Ordem de Serviço encontrada para o ID " + os.getIdOS());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Erro ao atualizar Ordem de Serviço: " + e.getMessage());
+        }
+    }
 
 }

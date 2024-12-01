@@ -4,12 +4,15 @@ import com.mycompany.pi4.controllers.ClienteController;
 import com.mycompany.pi4.controllers.EstoqueController;
 import com.mycompany.pi4.controllers.FuncionarioController;
 import com.mycompany.pi4.controllers.ServicoController;
+import com.mycompany.pi4.controllers.OrdemServicoController;
+import com.mycompany.pi4.controllers.VeiculoController;
 import com.mycompany.pi4.entity.Cliente;
 import com.mycompany.pi4.entity.Funcionario;
 import com.mycompany.pi4.entity.ItensServico;
 import com.mycompany.pi4.entity.OrdemServico;
 import com.mycompany.pi4.entity.Peca;
 import com.mycompany.pi4.entity.Servico;
+import com.mycompany.pi4.entity.Veiculo;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -27,6 +30,8 @@ public class CadastroOSView extends JFrame {
     private EstoqueController estoqueController;
     private ServicoController servicoController;
     private ClienteController clienteController;
+    private OrdemServicoController ordemServicoController;
+    private VeiculoController veiculoController;
 
     private List<Peca> pecasParaAtualizar;
     private JComboBox<Cliente> clienteComboBox;
@@ -34,6 +39,7 @@ public class CadastroOSView extends JFrame {
     
     private JTextField buscaNomeField, buscaCpfCnpjField;
     private JButton buscarButton;
+    private Integer idOS;
 
     public CadastroOSView(FuncionarioController funcionarioController, EstoqueController estoqueController, ServicoController servicoController, ClienteController clienteController) {
         this.funcionarioController = funcionarioController;
@@ -217,6 +223,26 @@ public class CadastroOSView extends JFrame {
         totalField.setEditable(false);
         totalPanel.add(totalField);
         bottomPanel.add(totalPanel, BorderLayout.NORTH);
+        
+
+        // Criação do botão Pagar
+        JButton pagarButton = new JButton("Pagar");
+        pagarButton.addActionListener(e -> {
+            try {
+                String totalText = totalField.getText().replace("Total: R$ ", "").trim();
+                if (totalText.isEmpty()) {
+                    throw new NumberFormatException("O campo de total está vazio.");
+                }
+                double total = Double.parseDouble(totalText.replace(",", "."));
+                PagamentoView pagamentoView = new PagamentoView(total, idOS, ordemServicoController);
+                pagamentoView.setVisible(true);
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Erro: Total inválido ou não informado. Verifique os dados da O.S. antes de prosseguir.", 
+                                              "Erro de Pagamento", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        bottomPanel.add(pagarButton);
+
 
         JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         salvarButton = new JButton("Salvar");
@@ -241,11 +267,12 @@ public class CadastroOSView extends JFrame {
     ) {
         this(funcionarioController, estoqueController, servicoController, clienteController);
 
-        // Preenche os campos com a O.S passada como argumento
         if (os != null) {
-            preencherCamposComOS(os);
+            this.idOS = os.getIdOS(); // Atribui o ID da O.S.
+            preencherCamposComOS(os); // Preenche os campos com os dados da O.S.
         }
     }
+
     
     private void atualizarTotal() {
         double total = 0;
@@ -526,8 +553,6 @@ public class CadastroOSView extends JFrame {
         }
     }
 
-
-
     private void salvarOS() {
         try {
             String veiculo = veiculoField.getText();
@@ -536,19 +561,46 @@ public class CadastroOSView extends JFrame {
             String status = statusField.getText();
             String data = dataField.getText();
 
-            if (veiculo.isEmpty() || descricao.isEmpty() || tecnico == null) {
+            if (veiculo.isEmpty() || descricao.isEmpty() || tecnico == null || data.isEmpty()) {
                 throw new IllegalArgumentException("Todos os campos devem ser preenchidos!");
             }
 
+            OrdemServico os = new OrdemServico();
+            Veiculo veiculoObj = veiculoController.buscarVeiculoPorPlaca(veiculoField.getText());
+            if (veiculoObj != null) {
+                os.setVeiculo(veiculoObj);
+            } else {
+                JOptionPane.showMessageDialog(this, "Veículo não encontrado! Verifique a placa.", "Erro", JOptionPane.ERROR_MESSAGE);
+                return; // Impede que continue com a OS inválida
+            }
+
+            os.setDescricao(descricao);
+            os.setFuncionario(tecnico);
+            os.setStatus(status);
+            os.setDataInicio(java.sql.Date.valueOf(data)); // Converte a data para o formato correto
+            os.setItensServico(new ArrayList<>()); // Adicione os itens de serviço aqui, se necessário
+            os.setPecas(pecasParaAtualizar); // Associa as peças atualizadas à O.S.
+
+            if (idOS == null) {
+                // Criar nova O.S.
+                idOS = ordemServicoController.criarOrdemServico(os); 
+            } else {
+                // Atualizar O.S. existente
+                os.setIdOS(idOS);
+                ordemServicoController.atualizarOrdemServico(os);
+            }
+
+            // Atualiza o estoque das peças
             for (Peca peca : pecasParaAtualizar) {
                 Peca pecaEstoque = estoqueController.consultarPecaPorId(peca.getIdPeca());
                 estoqueController.atualizarQuantidade(peca.getIdPeca(), pecaEstoque.getQuantidade() - peca.getQuantidade());
             }
 
             JOptionPane.showMessageDialog(this, "Ordem de Serviço salva com sucesso!");
-            dispose();
+            dispose();  
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Erro ao salvar OS: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 }

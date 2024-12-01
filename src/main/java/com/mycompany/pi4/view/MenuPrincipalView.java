@@ -44,7 +44,7 @@ public class MenuPrincipalView extends JFrame {
         this.marcaController = new MarcaController(connection);
         this.modeloController = new ModeloController(connection);
         this.clienteController = new ClienteController(connection);
-        this.veiculoController = new VeiculoController(connection);
+        this.veiculoController = new VeiculoController(connection, clienteController, modeloController);
         this.funcionarioController = new FuncionarioController(connection);
         this.estoqueController = new EstoqueController(connection);
         this.servicoController = new ServicoController(connection);
@@ -58,7 +58,6 @@ public class MenuPrincipalView extends JFrame {
         cadastroClienteButton = new JButton("Cadastro de Cliente");
         cadastroVeiculoButton = new JButton("Cadastro de Veículo");
         consultaEstoqueButton = new JButton("Consulta de Estoque");
-        cadastroOSButton = new JButton("Cadastro de OS");
         cadastroServicoButton = new JButton("Cadastro de Serviço");
         listarOSButton = new JButton("Listar OS");
 
@@ -66,7 +65,6 @@ public class MenuPrincipalView extends JFrame {
         cadastroClienteButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         cadastroVeiculoButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         consultaEstoqueButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        cadastroOSButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         cadastroServicoButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         listarOSButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
@@ -76,8 +74,6 @@ public class MenuPrincipalView extends JFrame {
         panel.add(cadastroVeiculoButton);
         panel.add(Box.createRigidArea(new Dimension(0, 10))); // Espaçamento vertical
         panel.add(consultaEstoqueButton);
-        panel.add(Box.createRigidArea(new Dimension(0, 10))); // Espaçamento vertical
-        panel.add(cadastroOSButton);
         panel.add(Box.createRigidArea(new Dimension(0, 10))); // Espaçamento vertical
         panel.add(cadastroServicoButton);
         panel.add(Box.createRigidArea(new Dimension(0, 10))); // Espaçamento vertical
@@ -101,10 +97,6 @@ public class MenuPrincipalView extends JFrame {
             consultaEstoqueView.setVisible(true);
         });
 
-        cadastroOSButton.addActionListener(e -> {
-            CadastroOSView cadastroOSView = new CadastroOSView(funcionarioController, estoqueController, servicoController, clienteController);
-            cadastroOSView.setVisible(true);
-        });
 
         cadastroServicoButton.addActionListener(e -> {
             CadastroServicoView cadastroServicoView = new CadastroServicoView(servicoController); // Passando ServicoController
@@ -144,7 +136,7 @@ public class MenuPrincipalView extends JFrame {
     // Método ajustado para redimensionar os botões com base no estado da tela
     private void ajustarTamanhoDosBotoes(boolean telaCheia) {
         Dimension tamanho = telaCheia ? new Dimension(350, 60) : new Dimension(150, 40); // Tamanhos ajustados
-        JButton[] botoes = {cadastroClienteButton, cadastroVeiculoButton, consultaEstoqueButton, cadastroOSButton, cadastroServicoButton, listarOSButton};
+        JButton[] botoes = {cadastroClienteButton, cadastroVeiculoButton, consultaEstoqueButton, cadastroServicoButton, listarOSButton};
         for (JButton botao : botoes) {
             botao.setPreferredSize(tamanho);
             botao.setMinimumSize(tamanho);

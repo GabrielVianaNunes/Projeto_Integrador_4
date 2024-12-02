@@ -26,6 +26,30 @@ public class ClienteController {
         String cnpjNormalizado = normalizarCNPJ(cliente.getCnpj());
         String cepNormalizado = normalizarCEP(cliente.getCep());
 
+        // Validação do tipo de cliente
+        if (cliente instanceof PessoaFisica) {
+            if (cpfNormalizado == null || cpfNormalizado.isEmpty()) {
+                System.out.println("Erro: CPF é obrigatório para clientes do tipo Pessoa Física.");
+                return;
+            }
+            if (cnpjNormalizado != null && !cnpjNormalizado.isEmpty()) {
+                System.out.println("Erro: CNPJ não deve ser preenchido para clientes do tipo Pessoa Física.");
+                return;
+            }
+        } else if (cliente instanceof PessoaJuridica) {
+            if (cnpjNormalizado == null || cnpjNormalizado.isEmpty()) {
+                System.out.println("Erro: CNPJ é obrigatório para clientes do tipo Pessoa Jurídica.");
+                return;
+            }
+            if (cpfNormalizado != null && !cpfNormalizado.isEmpty()) {
+                System.out.println("Erro: CPF não deve ser preenchido para clientes do tipo Pessoa Jurídica.");
+                return;
+            }
+        } else {
+            System.out.println("Erro: Tipo de cliente inválido. O cadastro não será realizado.");
+            return;
+        }
+
         String sql = "INSERT INTO cliente (nome, telefone, email, endereco, logradouro, cep, tipoCliente, cpf, cnpj) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -53,7 +77,6 @@ public class ClienteController {
             System.out.println("Erro ao cadastrar cliente: " + e.getMessage());
         }
     }
-
 
     // Método para buscar cliente por CPF ou CNPJ
     public Cliente buscarClienteCPFouCNPJ(String cpfOuCnpj) {
@@ -201,5 +224,31 @@ public class ClienteController {
 
         return clientes;
     }
-
+    
+    public boolean validarCadastroCliente(String tipoCliente, String cpf, String cnpj) {
+        if ("PF".equalsIgnoreCase(tipoCliente)) {
+            if (cpf == null || cpf.isEmpty()) {
+                System.out.println("Erro: CPF é obrigatório para clientes do tipo PF.");
+                return false;
+            }
+            if (cnpj != null && !cnpj.isEmpty()) {
+                System.out.println("Erro: CNPJ não deve ser preenchido para clientes do tipo PF.");
+                return false;
+            }
+        } else if ("PJ".equalsIgnoreCase(tipoCliente)) {
+            if (cnpj == null || cnpj.isEmpty()) {
+                System.out.println("Erro: CNPJ é obrigatório para clientes do tipo PJ.");
+                return false;
+            }
+            if (cpf != null && !cpf.isEmpty()) {
+                System.out.println("Erro: CPF não deve ser preenchido para clientes do tipo PJ.");
+                return false;
+            }
+        } else {
+            System.out.println("Erro: Tipo de cliente inválido. Use 'PF' ou 'PJ'.");
+            return false;
+        }
+        return true;
+    }
+    
 }

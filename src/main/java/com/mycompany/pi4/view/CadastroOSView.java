@@ -21,6 +21,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 
 public class CadastroOSView extends JFrame {
 
@@ -82,12 +84,7 @@ public class CadastroOSView extends JFrame {
         searchPanel.add(buscaNomeField);
 
         buscaCpfCnpjField = new JTextField();
-        buscaCpfCnpjField.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                formatarCpfCnpj(buscaCpfCnpjField);
-            }
-        });
+        configurarBuscaCpfCnpjField(); // Configura o listener para exibir a pergunta ao usuário
         searchPanel.add(new JLabel("CPF/CNPJ:"));
         searchPanel.add(buscaCpfCnpjField);
 
@@ -264,15 +261,89 @@ public class CadastroOSView extends JFrame {
     // Métodos de formatação
     private void formatarNome(JTextField campo) {
         String texto = campo.getText();
-        texto = texto.replaceAll("[^a-zA-ZáàâãéèêíïóôõöúçñÁÀÂÃÃÉÈÊÍÏÓÔÕÖÚÇÑ\\s]", "");
-        texto = texto.replaceAll("\\s{2,}", " ");
-        texto = texto.trim();
-        campo.setText(texto);
-    }
+        String textoFormatado = texto.replaceAll("[^a-zA-ZáàâãéèêíïóôõöúçñÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑ\\s]", ""); // Permite letras, acentos, espaços e "ç"
+        textoFormatado = textoFormatado.replaceAll("\\s{2,}", " "); // Substitui múltiplos espaços consecutivos por um único espaço
 
+        // Atualiza o campo apenas se houver alteração
+        if (!textoFormatado.equals(texto)) {
+            campo.setText(textoFormatado.trim()); // Remove espaços no início e no fim
+            campo.setCaretPosition(textoFormatado.length()); // Mantém o cursor no final do texto
+        }
+    }
+    
+    private boolean isBuscaPorCpf = true; // Flag para controlar se é CPF ou CNPJ
+
+    // Método para formatar CPF ou CNPJ baseado na escolha do usuário
     private void formatarCpfCnpj(JTextField campo) {
         String texto = campo.getText().replaceAll("[^\\d]", "");
-        campo.setText(texto);
+
+        if (isBuscaPorCpf) {
+            // Formatar como CPF
+            if (texto.length() > 11) {
+                texto = texto.substring(0, 11);
+            }
+            String formatado = texto.length() > 9
+                    ? texto.replaceFirst("(\\d{3})(\\d{3})(\\d{3})(\\d+)", "$1.$2.$3-$4")
+                    : texto.length() > 6
+                    ? texto.replaceFirst("(\\d{3})(\\d{3})(\\d+)", "$1.$2.$3")
+                    : texto.length() > 3
+                    ? texto.replaceFirst("(\\d{3})(\\d+)", "$1.$2")
+                    : texto;
+            campo.setText(formatado);
+        } else {
+            // Formatar como CNPJ
+            if (texto.length() > 14) {
+                texto = texto.substring(0, 14);
+            }
+
+            String formatado = texto.replaceFirst(
+                    "(\\d{2})(\\d{3})(\\d{3})(\\d{4})(\\d{0,2})",
+                    "$1.$2.$3/$4-$5"
+            );
+            campo.setText(formatado);
+        }
+
+        // Move o cursor para o final do texto no campo
+        campo.setCaretPosition(campo.getText().length());
+    }
+
+    // Evento para exibir a pergunta ao usuário
+    private void configurarBuscaCpfCnpjField() {
+        buscaCpfCnpjField.addFocusListener(new FocusAdapter() {
+            private boolean perguntaExibida = false; // Flag para controlar a exibição da pergunta
+
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (!perguntaExibida) {
+                    Object[] options = {"CPF", "CNPJ"};
+                    int escolha = JOptionPane.showOptionDialog(
+                            null,
+                            "Você deseja buscar por CPF ou CNPJ?",
+                            "Escolha de Busca",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.QUESTION_MESSAGE,
+                            null,
+                            options,
+                            options[0]
+                    );
+
+                    isBuscaPorCpf = (escolha == JOptionPane.YES_OPTION); // Sim para CPF, Não para CNPJ
+                    perguntaExibida = true; // Define a flag como verdadeira
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                perguntaExibida = false; // Reseta a flag ao perder o foco
+            }
+        });
+
+        buscaCpfCnpjField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                formatarCpfCnpj(buscaCpfCnpjField); // Chama o método de formatação
+            }
+        });
     }
 
     private void formatarPlaca(JTextField campo) {

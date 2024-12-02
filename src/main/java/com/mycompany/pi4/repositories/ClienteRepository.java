@@ -3,6 +3,7 @@ package com.mycompany.pi4.repositories;
 import com.mycompany.pi4.entity.Cliente;
 import com.mycompany.pi4.entity.PessoaFisica;
 import com.mycompany.pi4.entity.PessoaJuridica;
+import com.mycompany.pi4.util.DatabaseConnection;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -151,4 +152,23 @@ public class ClienteRepository {
         if (cep == null) return null;
         return cep.replaceAll("[^\\d]", "");
     }
+    
+    public void excluir(int idCliente) {
+        String sql = "DELETE FROM cliente WHERE idcliente = ?";
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, idCliente);
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Cliente com ID " + idCliente + " excluído com sucesso.");
+            } else {
+                System.out.println("Nenhum cliente encontrado com o ID " + idCliente);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Erro ao excluir cliente: " + e.getMessage());
+        }
+    }
+
 }

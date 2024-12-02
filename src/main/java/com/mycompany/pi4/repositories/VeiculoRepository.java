@@ -1,6 +1,7 @@
 package com.mycompany.pi4.repositories;
 
 import com.mycompany.pi4.entity.Cliente;
+import com.mycompany.pi4.entity.Marca;
 import com.mycompany.pi4.entity.Modelo;
 import com.mycompany.pi4.entity.Veiculo;
 
@@ -130,8 +131,109 @@ public class VeiculoRepository {
         Modelo modelo = new Modelo();
         modelo.setIdModelo(rs.getInt("idModelo"));
         modelo.setNome(rs.getString("nomeModelo"));
+
+        // Marca
+        Marca marca = new Marca();
+        if (rs.getString("nomeMarca") != null) {
+            marca.setIdMarca(rs.getInt("idMarca"));
+            marca.setNome(rs.getString("nomeMarca"));
+        }
+        modelo.setMarca(marca);
+
         veiculo.setModelo(modelo);
 
         return veiculo;
     }
+
+    
+    // Método para buscar veículos por cliente
+    public List<Veiculo> buscarPorCliente(int idCliente) {
+        String sql = """
+            SELECT v.*, c.nome AS nomeCliente, m.nome AS nomeModelo, ma.idMarca, ma.nome AS nomeMarca
+            FROM Veiculo v
+            JOIN Cliente c ON v.idCliente = c.idCliente
+            JOIN Modelo m ON v.idModelo = m.idModelo
+            LEFT JOIN Marca ma ON m.idMarca = ma.idMarca -- LEFT JOIN para incluir modelos sem marca
+            WHERE v.idCliente = ?
+        """;
+        List<Veiculo> veiculos = new ArrayList<>();
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, idCliente);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    veiculos.add(montarVeiculo(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.err.println("Erro ao buscar veículos por cliente: " + e.getMessage());
+        }
+
+        return veiculos;
+    }
+
+    
+    // Método para excluir veículo por ID
+    public void excluirPorId(int idVeiculo) {
+        String sql = "DELETE FROM veiculo WHERE idVeiculo = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, idVeiculo);
+            int rowsAffected = stmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("Veículo excluído com sucesso. ID: " + idVeiculo);
+            } else {
+                System.err.println("Nenhum veículo encontrado com o ID: " + idVeiculo);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.err.println("Erro ao excluir veículo: " + e.getMessage());
+        }
+    }
+    
+    public void excluirPorPlaca(String placa) {
+        String sql = "DELETE FROM veiculo WHERE placa = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, placa);
+            int rowsAffected = stmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("Veículo excluído com sucesso. Placa: " + placa);
+            } else {
+                System.err.println("Nenhum veículo encontrado com a placa: " + placa);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.err.println("Erro ao excluir veículo por placa: " + e.getMessage());
+        }
+    }
+
+    
+    // Método para editar os dados de um veículo
+    public void atualizar(Veiculo veiculo) {
+        String sql = "UPDATE veiculo SET placa = ?, ano = ?, quilometragem = ?, idModelo = ? WHERE idVeiculo = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, veiculo.getPlaca());
+            stmt.setInt(2, veiculo.getAno());
+            stmt.setInt(3, veiculo.getQuilometragem());
+            stmt.setInt(4, veiculo.getModelo().getIdModelo());
+            stmt.setInt(5, veiculo.getIdVeiculo());
+
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Veículo atualizado com sucesso. ID: " + veiculo.getIdVeiculo());
+            } else {
+                System.err.println("Nenhum veículo encontrado para atualizar. ID: " + veiculo.getIdVeiculo());
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.err.println("Erro ao atualizar veículo: " + e.getMessage());
+        }
+    }
+
 }

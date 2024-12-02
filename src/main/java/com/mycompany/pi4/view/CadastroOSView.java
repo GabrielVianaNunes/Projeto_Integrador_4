@@ -46,6 +46,8 @@ public class CadastroOSView extends JFrame {
     private JTextField buscaNomeField, buscaCpfCnpjField;
     private JButton buscarButton;
     private Integer idOS;
+    private List<ItensServico> itensServico;
+    private List<Peca> pecas;
 
     public CadastroOSView(
             FuncionarioController funcionarioController,
@@ -360,15 +362,22 @@ public class CadastroOSView extends JFrame {
             ServicoController servicoController,
             VeiculoController veiculoController,
             ClienteController clienteController,
-            OrdemServicoController ordemServicoController, // Adicionado o OrdemServicoController
-            OrdemServico os // Adicionado para suportar a abertura de uma OS existente
+            OrdemServicoController ordemServicoController,
+            OrdemServico os,  // Passa a O.S como parâmetro
+            List<ItensServico> itensServico,  // Passa os itens de serviço
+            List<Peca> pecas  // Passa as peças
     ) {
         this(funcionarioController, estoqueController, servicoController, veiculoController, clienteController, ordemServicoController);
         if (os != null) {
             this.idOS = os.getIdOS(); // Atribui o ID da O.S.
             preencherCamposComOS(os); // Preenche os campos com os dados da O.S.
         }
+
+        // Agora, também podemos usar as listas de itens de serviço e peças
+        this.itensServico = itensServico;
+        this.pecas = pecas;
     }
+
 
     private void atualizarTotal() {
         double total = 0;

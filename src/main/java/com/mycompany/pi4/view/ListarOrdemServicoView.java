@@ -6,7 +6,9 @@ import com.mycompany.pi4.controllers.EstoqueController;
 import com.mycompany.pi4.controllers.ServicoController;
 import com.mycompany.pi4.controllers.ClienteController;
 import com.mycompany.pi4.controllers.VeiculoController;
+import com.mycompany.pi4.entity.ItensServico;
 import com.mycompany.pi4.entity.OrdemServico;
+import com.mycompany.pi4.entity.Peca;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -113,18 +115,20 @@ public class ListarOrdemServicoView extends JFrame {
     private void abrirOrdemServico(int idOS) {
         OrdemServico os = ordemServicoController.consultarOrdemServicoPorId(idOS); // Recupera a O.S do banco
         if (os != null) {
-            CadastroOSView cadastroOSView = new CadastroOSView(
-                    funcionarioController,
-                    estoqueController,
-                    servicoController,
-                    veiculoController, // Adicionado o VeiculoController
-                    clienteController,
-                    ordemServicoController, // Adicionado o OrdemServicoController
-                    os // Passa a O.S como parâmetro
+            // Recupera as listas de itens de serviço e peças associadas à O.S.
+            List<ItensServico> itensServico = ordemServicoController.consultarItensServicoPorOrdemServico(idOS);
+            List<Peca> pecas = ordemServicoController.consultarPecasPorOrdemServico(idOS);
+
+            // Passa a O.S, itens de serviço e peças para a tela VisualizarOSView
+            VisualizarOSView visualizarOSView = new VisualizarOSView(
+                    os, // Passa a O.S como parâmetro
+                    itensServico, // Passa os itens de serviço
+                    pecas // Passa as peças
             );
-            cadastroOSView.setVisible(true);
+            visualizarOSView.setVisible(true); // Exibe a tela de visualização de O.S
         } else {
             JOptionPane.showMessageDialog(this, "Ordem de Serviço não encontrada!", "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 }

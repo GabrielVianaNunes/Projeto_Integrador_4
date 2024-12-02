@@ -50,11 +50,11 @@ public class VisualizarOSView extends JFrame {
         infoPanel.add(new JLabel("Data Fim:"));
         infoPanel.add(new JLabel(ordemServico.getDataFim() != null ? ordemServico.getDataFim().toString() : "N/A"));
 
-        // Valor Total
-        double valorTotal = calcularValorTotal();
+        // Recupera o valor total diretamente da O.S. (verifique se o valorTotal foi preenchido corretamente)
+        double valorTotal = ordemServico.getValorTotal();
         infoPanel.add(new JLabel("Valor Total:"));
         JLabel totalLabel = new JLabel(String.format("R$ %.2f", valorTotal));
-        infoPanel.add(totalLabel);
+        infoPanel.add(totalLabel); // Atualiza o valor total na interface
 
         mainPanel.add(infoPanel, BorderLayout.NORTH);
 
@@ -95,22 +95,7 @@ public class VisualizarOSView extends JFrame {
         add(mainPanel);
     }
 
-    private double calcularValorTotal() {
-        double total = 0;
-
-        // Calcula o total para os itens de serviço
-        for (ItensServico item : itensServico) {
-            total += item.getQuantidade() * item.getServico().getPrecoUnitario();
-        }
-
-        // Calcula o total para as peças
-        for (Peca peca : pecas) {
-            total += peca.getQuantidade() * peca.getPrecoUnitario();
-        }
-
-        return total;
-    }
-
+    // Preencher tabela de serviços
     private void preencherTabelaServicos(DefaultTableModel model) {
         if (itensServico != null && !itensServico.isEmpty()) {
             for (ItensServico item : itensServico) {
@@ -124,6 +109,7 @@ public class VisualizarOSView extends JFrame {
         }
     }
 
+    // Preencher tabela de peças
     private void preencherTabelaPecas(DefaultTableModel model) {
         if (pecas != null && !pecas.isEmpty()) {
             for (Peca peca : pecas) {

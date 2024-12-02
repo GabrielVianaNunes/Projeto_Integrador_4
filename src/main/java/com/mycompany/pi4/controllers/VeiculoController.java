@@ -1,6 +1,7 @@
 package com.mycompany.pi4.controllers;
 
 import com.mycompany.pi4.entity.Cliente;
+import com.mycompany.pi4.entity.Marca;
 import com.mycompany.pi4.entity.Modelo;
 import com.mycompany.pi4.entity.Veiculo;
 import java.sql.Connection;
@@ -168,4 +169,55 @@ public class VeiculoController {
 
         return veiculo;
     }
+    
+    public List<Veiculo> buscarVeiculosPorCliente(int idCliente) {
+        String sql = """
+            SELECT v.idVeiculo, v.placa, v.ano, v.quilometragem, 
+                   m.idModelo, m.nome AS modelo_nome, 
+                   ma.idMarca, ma.nome AS marca_nome
+            FROM veiculo v
+            INNER JOIN modelo m ON v.idModelo = m.idModelo
+            INNER JOIN marca ma ON m.idMarca = ma.idMarca
+            WHERE v.idCliente = ?
+        """;
+
+        List<Veiculo> veiculos = new ArrayList<>();
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, idCliente);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    // Instancia o veículo
+                    Veiculo veiculo = new Veiculo();
+                    veiculo.setIdVeiculo(rs.getInt("idVeiculo"));
+                    veiculo.setPlaca(rs.getString("placa"));
+                    veiculo.setAno(rs.getInt("ano"));
+                    veiculo.setQuilometragem(rs.getInt("quilometragem"));
+
+                    // Instancia o modelo
+                    Modelo modelo = new Modelo();
+                    modelo.setIdModelo(rs.getInt("idModelo"));
+                    modelo.setNome(rs.getString("modelo_nome"));
+
+                    // Instancia a marca e associa ao modelo
+                    Marca marca = new Marca();
+                    marca.setIdMarca(rs.getInt("idMarca"));
+                    marca.setNome(rs.getString("marca_nome"));
+                    modelo.setMarca(marca);
+
+                    // Associa o modelo ao veículo
+                    veiculo.setModelo(modelo);
+
+                    veiculos.add(veiculo);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Erro ao buscar veículos do cliente: " + e.getMessage());
+        }
+
+        return veiculos;
+    }
+
+
 }

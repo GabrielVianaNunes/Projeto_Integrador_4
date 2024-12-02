@@ -109,7 +109,8 @@ public class MenuPrincipalView extends JFrame {
                     funcionarioController,
                     estoqueController,
                     servicoController,
-                    clienteController
+                    clienteController,
+                    veiculoController
             );
             listarView.setVisible(true);
         });

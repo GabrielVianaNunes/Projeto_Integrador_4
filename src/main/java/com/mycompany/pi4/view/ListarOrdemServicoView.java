@@ -5,6 +5,7 @@ import com.mycompany.pi4.controllers.FuncionarioController;
 import com.mycompany.pi4.controllers.EstoqueController;
 import com.mycompany.pi4.controllers.ServicoController;
 import com.mycompany.pi4.controllers.ClienteController;
+import com.mycompany.pi4.controllers.VeiculoController;
 import com.mycompany.pi4.entity.OrdemServico;
 
 import javax.swing.*;
@@ -19,19 +20,22 @@ public class ListarOrdemServicoView extends JFrame {
     private EstoqueController estoqueController;
     private ServicoController servicoController;
     private ClienteController clienteController;
+    private VeiculoController veiculoController;
 
     public ListarOrdemServicoView(
-            OrdemServicoController ordemServicoController,
-            FuncionarioController funcionarioController,
-            EstoqueController estoqueController,
-            ServicoController servicoController,
-            ClienteController clienteController
-    ) {
-        this.ordemServicoController = ordemServicoController;
-        this.funcionarioController = funcionarioController;
-        this.estoqueController = estoqueController;
-        this.servicoController = servicoController;
-        this.clienteController = clienteController;
+                OrdemServicoController ordemServicoController,
+                FuncionarioController funcionarioController,
+                EstoqueController estoqueController,
+                ServicoController servicoController,
+                ClienteController clienteController,
+                VeiculoController veiculoController // Adicionado o VeiculoController
+        ) {
+            this.ordemServicoController = ordemServicoController;
+            this.funcionarioController = funcionarioController;
+            this.estoqueController = estoqueController;
+            this.servicoController = servicoController;
+            this.clienteController = clienteController;
+            this.veiculoController = veiculoController;
 
         setTitle("Lista de Ordens de Serviço");
         setSize(800, 600);
@@ -60,9 +64,10 @@ public class ListarOrdemServicoView extends JFrame {
         JButton cadastroOSButton = new JButton("Cadastro de OS");
         cadastroOSButton.addActionListener(e -> {
             CadastroOSView cadastroOSView = new CadastroOSView(
-                    funcionarioController, 
-                    estoqueController, 
-                    servicoController, 
+                    funcionarioController,
+                    estoqueController,
+                    servicoController,
+                    veiculoController, // Adicionado o VeiculoController
                     clienteController
             );
             cadastroOSView.setVisible(true);
@@ -111,6 +116,7 @@ public class ListarOrdemServicoView extends JFrame {
                 funcionarioController,
                 estoqueController,
                 servicoController,
+                veiculoController, // Adicionado o VeiculoController
                 clienteController,
                 os // Passa a O.S como parâmetro
             );
@@ -120,5 +126,4 @@ public class ListarOrdemServicoView extends JFrame {
         }
     }
 
-    
 }

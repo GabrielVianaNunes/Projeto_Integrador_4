@@ -8,7 +8,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.sql.Connection;
@@ -27,7 +26,7 @@ public class CadastroClienteView extends JFrame {
         setLocationRelativeTo(null);
 
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBackground(new Color(245, 245, 245)); // Cor de fundo suave
+        mainPanel.setBackground(new Color(245, 245, 245));
 
         JLabel titulo = new JLabel("Cadastro de Cliente", JLabel.CENTER);
         titulo.setFont(new Font("Arial", Font.BOLD, 20));
@@ -54,12 +53,7 @@ public class CadastroClienteView extends JFrame {
 
         formPanel.add(new JLabel("Tipo Cliente:"));
         tipoClienteComboBox = new JComboBox<>(new String[]{"Pessoa Física", "Pessoa Jurídica"});
-        tipoClienteComboBox.addItemListener(new ItemListener() {
-            @Override
-            public void itemStateChanged(ItemEvent e) {
-                onTipoClienteChange(e);
-            }
-        });
+        tipoClienteComboBox.addItemListener(this::onTipoClienteChange);
         formPanel.add(tipoClienteComboBox);
 
         formPanel.add(new JLabel("CPF:"));
@@ -75,25 +69,20 @@ public class CadastroClienteView extends JFrame {
         formPanel.add(new JLabel("CNPJ:"));
         cnpjField = new JTextField();
         cnpjField.setEnabled(false);
+        cnpjField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                formatarCNPJ();
+            }
+        });
         formPanel.add(cnpjField);
 
         formPanel.add(new JLabel("Telefone:"));
         telefoneField = new JTextField();
         telefoneField.addKeyListener(new KeyAdapter() {
             @Override
-            public void keyPressed(KeyEvent e) {
-                ajustarBackspaceDelete(e);
-            }
-
-            @Override
             public void keyReleased(KeyEvent e) {
-                String texto = telefoneField.getText().replaceAll("[^\\d]", "");
-                if (texto.length() > 11) {
-                    texto = texto.substring(0, 11);
-                }
-                String formatado = formatarTexto(texto);
-                telefoneField.setText(formatado);
-                telefoneField.setCaretPosition(formatado.length());
+                formatarTelefone();
             }
         });
         formPanel.add(telefoneField);
@@ -107,7 +96,7 @@ public class CadastroClienteView extends JFrame {
         formPanel.add(enderecoField);
 
         formPanel.add(new JLabel("Logradouro:"));
-        logradouroField = new JTextField(); // Novo campo para logradouro
+        logradouroField = new JTextField();
         formPanel.add(logradouroField);
 
         formPanel.add(new JLabel("CEP:"));
@@ -148,88 +137,55 @@ public class CadastroClienteView extends JFrame {
     }
 
     private void formatarNome() {
-        String texto = nomeField.getText();
-        String textoFormatado = texto.replaceAll("[^a-zA-ZáàâãéèêíïóôõöúçñÁÀÂÃÃÉÈÊÍÏÓÔÕÖÚÇÑ\\s]", ""); // Permite letras, acentos, espaços e "ç"
-        textoFormatado = textoFormatado.replaceAll("\\s{2,}", " "); // Substitui múltiplos espaços consecutivos por um único espaço
-
-        // Atualiza o campo apenas se houver alteração
-        if (!textoFormatado.equals(texto)) {
-            nomeField.setText(textoFormatado);
-            nomeField.setCaretPosition(textoFormatado.length()); // Mantém o cursor no final do texto
-        }
+        String texto = nomeField.getText().replaceAll("[^a-zA-ZáàâãéèêíïóôõöúçñÁÀÂÃÃÉÈÊÍÏÓÔÕÖÚÇÑ\\s]", "");
+        texto = texto.replaceAll("\\s{2,}", " ").trim();
+        nomeField.setText(texto);
     }
 
     private void formatarCPF() {
         String texto = cpfField.getText().replaceAll("[^\\d]", "");
-        if (texto.length() > 11) {
-            texto = texto.substring(0, 11);
-        }
-        StringBuilder sb = new StringBuilder(texto);
+        if (texto.length() > 11) texto = texto.substring(0, 11);
+        String formatado = texto.length() > 9
+                ? texto.replaceFirst("(\\d{3})(\\d{3})(\\d{3})(\\d+)", "$1.$2.$3-$4")
+                : texto.length() > 6
+                ? texto.replaceFirst("(\\d{3})(\\d{3})(\\d+)", "$1.$2.$3")
+                : texto.length() > 3
+                ? texto.replaceFirst("(\\d{3})(\\d+)", "$1.$2")
+                : texto;
+        cpfField.setText(formatado);
+    }
 
-        if (texto.length() > 9) {
-            sb.insert(3, '.').insert(7, '.').insert(11, '-');
-        } else if (texto.length() > 6) {
-            sb.insert(3, '.').insert(7, '.');
-        } else if (texto.length() > 3) {
-            sb.insert(3, '.');
-        }
+    private void formatarCNPJ() {
+        String texto = cnpjField.getText().replaceAll("[^\\d]", "");
+        if (texto.length() > 14) texto = texto.substring(0, 14);
+        String formatado = texto.replaceFirst("(\\d{2})(\\d{3})(\\d{3})(\\d{4})(\\d{2})", "$1.$2.$3/$4-$5");
+        cnpjField.setText(formatado);
+    }
 
-        cpfField.setText(sb.toString());
+    private void formatarTelefone() {
+        String texto = telefoneField.getText().replaceAll("[^\\d]", "");
+        if (texto.length() > 11) texto = texto.substring(0, 11);
+        String formatado = texto.length() > 6
+                ? texto.replaceFirst("(\\d{2})(\\d{5})(\\d+)", "($1) $2-$3")
+                : texto.length() > 2
+                ? texto.replaceFirst("(\\d{2})(\\d+)", "($1) $2")
+                : texto;
+        telefoneField.setText(formatado);
     }
 
     private void formatarCEP() {
         String texto = cepField.getText().replaceAll("[^\\d]", "");
-
-        if (texto.length() > 8) {
-            texto = texto.substring(0, 8);
-        }
-
-        StringBuilder sb = new StringBuilder(texto);
-        if (texto.length() > 5) {
-            sb.insert(5, '-');
-        }
-
-        cepField.setText(sb.toString());
-        cepField.setCaretPosition(sb.length());
-    }
-
-    private void ajustarBackspaceDelete(KeyEvent e) {
-        String textoAtual = telefoneField.getText().replaceAll("[^\\d]", "");
-        int posicaoCursor = telefoneField.getCaretPosition();
-
-        if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE && posicaoCursor > 0) {
-            if (textoAtual.length() > 0) {
-                textoAtual = textoAtual.substring(0, textoAtual.length() - 1);
-            }
-        }
-
-        String formatado = formatarTexto(textoAtual);
-        telefoneField.setText(formatado);
-        telefoneField.setCaretPosition(formatado.length());
-    }
-
-    private String formatarTexto(String texto) {
-        StringBuilder sb = new StringBuilder();
-        if (texto.length() > 0) {
-            sb.append("(").append(texto.substring(0, Math.min(texto.length(), 2))).append(") ");
-        }
-        if (texto.length() > 2) {
-            sb.append(texto.substring(2, Math.min(texto.length(), 7))).append("-");
-        }
-        if (texto.length() > 7) {
-            sb.append(texto.substring(7));
-        }
-        return sb.toString();
+        if (texto.length() > 8) texto = texto.substring(0, 8);
+        cepField.setText(texto.replaceFirst("(\\d{5})(\\d+)", "$1-$2"));
     }
 
     private void onTipoClienteChange(ItemEvent event) {
         if (event.getStateChange() == ItemEvent.SELECTED) {
-            String tipoSelecionado = (String) tipoClienteComboBox.getSelectedItem();
-            if ("Pessoa Física".equals(tipoSelecionado)) {
+            if ("Pessoa Física".equals(tipoClienteComboBox.getSelectedItem())) {
                 cpfField.setEnabled(true);
                 cnpjField.setEnabled(false);
                 cnpjField.setText("");
-            } else if ("Pessoa Jurídica".equals(tipoSelecionado)) {
+            } else {
                 cpfField.setEnabled(false);
                 cnpjField.setEnabled(true);
                 cpfField.setText("");
@@ -246,33 +202,39 @@ public class CadastroClienteView extends JFrame {
         telefoneField.setText("");
         emailField.setText("");
         enderecoField.setText("");
+        logradouroField.setText("");
         cepField.setText("");
     }
 
     private void onSalvar(ActionEvent e) {
+        String tipoCliente = "Pessoa Física".equals(tipoClienteComboBox.getSelectedItem()) ? "PF" : "PJ";
         Cliente cliente = new Cliente();
         cliente.setNome(nomeField.getText());
         cliente.setTelefone(telefoneField.getText());
         cliente.setEmail(emailField.getText());
         cliente.setEndereco(enderecoField.getText());
-        cliente.setLogradouro(logradouroField.getText()); // Captura o valor do novo campo
+        cliente.setLogradouro(logradouroField.getText());
         cliente.setCep(cepField.getText());
-        cliente.setTipoCliente((String) tipoClienteComboBox.getSelectedItem());
+        cliente.setTipoCliente(tipoCliente);
+
+        if ("PF".equals(tipoCliente) && (cpfField.getText().isEmpty() || cpfField.getText().length() != 14)) {
+            JOptionPane.showMessageDialog(this, "CPF inválido!");
+            return;
+        }
+        if ("PJ".equals(tipoCliente) && (cnpjField.getText().isEmpty() || cnpjField.getText().length() != 18)) {
+            JOptionPane.showMessageDialog(this, "CNPJ inválido!");
+            return;
+        }
+
         cliente.setCpf(cpfField.getText());
         cliente.setCnpj(cnpjField.getText());
 
         try (Connection connection = DatabaseConnection.getConnection()) {
             ClienteController clienteController = new ClienteController(connection);
             clienteController.cadastrarCliente(cliente);
-
-            if (cliente.getIdCliente() > 0) {
-                idClienteField.setText(String.valueOf(cliente.getIdCliente()));
-                JOptionPane.showMessageDialog(this, "Cliente cadastrado com sucesso! ID: " + cliente.getIdCliente());
-            } else {
-                JOptionPane.showMessageDialog(this, "Erro ao cadastrar cliente.");
-            }
+            JOptionPane.showMessageDialog(this, "Cliente cadastrado com sucesso!");
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Erro ao conectar ao banco de dados: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this, "Erro ao cadastrar cliente: " + ex.getMessage());
         }
     }
 }

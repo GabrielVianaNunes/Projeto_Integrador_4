@@ -74,4 +74,14 @@ public class Veiculo {
     public void setModelo(Modelo modelo) {
         this.modelo = modelo;
     }
+    
+    @Override
+    public String toString() {
+        if (modelo != null && modelo.getMarca() != null) {
+            return modelo.getMarca().getNome() + " " + modelo.getNome() + " - " + placa;
+        }
+        return placa != null ? "Veículo - " + placa : "Veículo sem identificação";
+    }
+
+
 }

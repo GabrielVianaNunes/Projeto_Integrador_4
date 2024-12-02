@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.mycompany.pi4.entity;
 
 public class Modelo {
@@ -9,7 +5,7 @@ public class Modelo {
     private int idModelo;
     private String nome;
     private Marca marca;
-    
+
     public Modelo() {
     }
 
@@ -42,5 +38,10 @@ public class Modelo {
 
     public void setMarca(Marca marca) {
         this.marca = marca;
+    }
+
+    @Override
+    public String toString() {
+        return nome; // Retorna apenas o nome do modelo
     }
 }

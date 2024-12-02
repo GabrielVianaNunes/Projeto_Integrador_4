@@ -161,7 +161,8 @@ public class CadastroOSView extends JFrame {
         infoPanel.add(new JLabel("Status:"));
         infoPanel.add(statusField);
 
-        dataField = new JTextField();
+        dataField = new JTextField(obterDataAtual()); // Define a data atual no campo
+        dataField.setEditable(false); // O usuário não pode editar a data manualmente
         infoPanel.add(new JLabel("Data:"));
         infoPanel.add(dataField);
 
@@ -346,13 +347,9 @@ public class CadastroOSView extends JFrame {
         });
     }
 
-    private void formatarPlaca(JTextField campo) {
-        String texto = campo.getText().toUpperCase();
-        texto = texto.replaceAll("[^A-Z0-9]", "");
-        if (texto.length() > 7) {
-            texto = texto.substring(0, 7);
-        }
-        campo.setText(texto);
+    private String obterDataAtual() {
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+        return sdf.format(new java.util.Date());
     }
 
     public CadastroOSView(

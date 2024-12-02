@@ -138,20 +138,9 @@ public class CadastroClienteView extends JFrame {
         salvarButton.setForeground(Color.WHITE);
         salvarButton.addActionListener(e -> {
             String tipoCliente = tipoClienteComboBox.getSelectedItem().toString().equals("Pessoa Física") ? "PF" : "PJ";
-            String cpf = cpfField.getText().trim();
-            String cnpj = cnpjField.getText().trim();
-
-            // Validação básica no front-end
-            if ("PF".equals(tipoCliente) && (cpf.isEmpty() || cpf.length() != 14)) {
-                JOptionPane.showMessageDialog(this, "CPF inválido ou não preenchido.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            if ("PJ".equals(tipoCliente) && (cnpj.isEmpty() || cnpj.length() != 18)) {
-                JOptionPane.showMessageDialog(this, "CNPJ inválido ou não preenchido.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
 
             Cliente cliente = tipoCliente.equals("PF") ? new PessoaFisica() : new PessoaJuridica();
+            cliente.setIdCliente(Integer.parseInt(idClienteField.getText())); // Mantém o mesmo ID
             cliente.setNome(nomeField.getText().trim());
             cliente.setTelefone(telefoneField.getText().trim());
             cliente.setEmail(emailField.getText().trim());
@@ -159,28 +148,23 @@ public class CadastroClienteView extends JFrame {
             cliente.setLogradouro(logradouroField.getText().trim());
             cliente.setCep(cepField.getText().trim());
 
-            if ("PF".equals(tipoCliente)) {
-                ((PessoaFisica) cliente).setCpf(cpf);
-            } else {
-                ((PessoaJuridica) cliente).setCnpj(cnpj);
+            if (cliente instanceof PessoaFisica) {
+                ((PessoaFisica) cliente).setCpf(cpfField.getText().trim()); // Mantém CPF sem alterações
+            } else if (cliente instanceof PessoaJuridica) {
+                ((PessoaJuridica) cliente).setCnpj(cnpjField.getText().trim()); // Mantém CNPJ sem alterações
             }
 
             try (Connection connection = DatabaseConnection.getConnection()) {
                 ClienteRepository clienteRepository = new ClienteRepository(connection);
 
-                // Verifica se já existe um cliente com o mesmo CPF ou CNPJ
-                if (clienteRepository.buscarPorCpfOuCnpj("PF".equals(tipoCliente) ? cpf : cnpj) != null) {
-                    JOptionPane.showMessageDialog(this, "Cliente com o mesmo CPF ou CNPJ já cadastrado.", "Erro de Cadastro", JOptionPane.ERROR_MESSAGE);
-                    return;
-                }
-
-                clienteRepository.salvar(cliente);
-                JOptionPane.showMessageDialog(this, "Cliente cadastrado com sucesso!");
-                limparCampos(); // Limpa os campos após salvar
+                clienteRepository.atualizar(cliente); // Certifique-se de que existe um método atualizar
+                JOptionPane.showMessageDialog(this, "Cliente atualizado com sucesso!");
+                dispose(); // Fecha a janela após salvar
             } catch (SQLException ex) {
-                JOptionPane.showMessageDialog(this, "Erro ao salvar cliente: " + ex.getMessage(), "Erro de Banco de Dados", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Erro ao salvar cliente: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
         });
+
 
 
         buttonPanel.add(salvarButton);
@@ -241,11 +225,14 @@ public class CadastroClienteView extends JFrame {
     }
 
     private void formatarCNPJ() {
+        // Salva a posição atual do cursor
+        int posicaoCursor = cnpjField.getCaretPosition();
+
         // Remove todos os caracteres que não são dígitos
         String texto = cnpjField.getText().replaceAll("[^\\d]", "");
 
         // Se o texto tem exatamente 8 dígitos, solicita a identificação (Matriz ou Filial)
-        if (texto.length() == 8) {
+        if (texto.length() == 8 && !texto.contains("0001") && !texto.contains("0002")) {
             Object[] options = {"Matriz (0001)", "Filial (0002)"};
             int escolha = JOptionPane.showOptionDialog(
                     null,
@@ -278,8 +265,9 @@ public class CadastroClienteView extends JFrame {
         );
         cnpjField.setText(formatado);
 
-        // Move o cursor para o final do texto no campo
-        cnpjField.setCaretPosition(formatado.length());
+        // Ajusta a posição do cursor
+        posicaoCursor = Math.min(posicaoCursor, formatado.length()); // Garante que o cursor não passe o final do texto
+        cnpjField.setCaretPosition(posicaoCursor);
     }
 
     private void formatarTelefone() {
@@ -317,15 +305,26 @@ public class CadastroClienteView extends JFrame {
         idClienteField.setText(String.valueOf(cliente.getIdCliente()));
         nomeField.setText(cliente.getNome());
         tipoClienteComboBox.setSelectedItem(cliente instanceof PessoaFisica ? "Pessoa Física" : "Pessoa Jurídica");
-        cpfField.setText(cliente instanceof PessoaFisica ? ((PessoaFisica) cliente).getCpf() : "");
-        cnpjField.setText(cliente instanceof PessoaJuridica ? ((PessoaJuridica) cliente).getCnpj() : "");
+
+        // Desabilitar os campos CPF/CNPJ
+        if (cliente instanceof PessoaFisica) {
+            cpfField.setText(((PessoaFisica) cliente).getCpf());
+            cpfField.setEnabled(false); // Desabilitar o campo
+            cnpjField.setText("");
+            cnpjField.setEnabled(false); // Garantir que CNPJ também esteja desabilitado
+        } else if (cliente instanceof PessoaJuridica) {
+            cnpjField.setText(((PessoaJuridica) cliente).getCnpj());
+            cnpjField.setEnabled(false); // Desabilitar o campo
+            cpfField.setText("");
+            cpfField.setEnabled(false); // Garantir que CPF também esteja desabilitado
+        }
+
         telefoneField.setText(cliente.getTelefone());
         emailField.setText(cliente.getEmail());
         enderecoField.setText(cliente.getEndereco());
         logradouroField.setText(cliente.getLogradouro());
         cepField.setText(cliente.getCep());
     }
-
 
     private void onLimpar(ActionEvent e) {
         idClienteField.setText("");

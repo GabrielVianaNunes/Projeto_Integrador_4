@@ -7,6 +7,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.util.List;
+import javax.swing.table.DefaultTableCellRenderer;
 
 public class ConsultaEstoqueView extends JFrame {
     private JTable tabelaEstoque;
@@ -70,19 +71,48 @@ public class ConsultaEstoqueView extends JFrame {
                 peca.getPrecoUnitario()
             });
         }
+
+        // Configura o renderizador para alterar a cor das linhas
+        tabelaEstoque.setDefaultRenderer(Object.class, new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+                // Define a cor de fundo com base na quantidade
+                int quantidade = (int) table.getValueAt(row, 2); // Assume que a quantidade está na coluna 2
+                if (quantidade < 3) {
+                    c.setBackground(new Color(255, 235, 59)); // Amarelo para alerta
+                } else {
+                    c.setBackground(Color.WHITE); // Cor padrão
+                }
+
+                if (isSelected) {
+                    c.setBackground(new Color(184, 207, 229)); // Cor de seleção
+                }
+
+                return c;
+            }
+        });
     }
+
+
 
     // Adiciona uma nova peça
     private void adicionarPeca() {
-        String descricao = JOptionPane.showInputDialog(this, "Descrição da peça:");
-        if (descricao == null || descricao.trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Descrição inválida!", "Erro", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
         try {
+            String descricao = JOptionPane.showInputDialog(this, "Descrição da peça:");
+            if (descricao == null || descricao.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Descrição inválida!", "Erro", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             int quantidade = Integer.parseInt(JOptionPane.showInputDialog(this, "Quantidade:"));
             double precoUnitario = Double.parseDouble(JOptionPane.showInputDialog(this, "Preço Unitário:"));
+
+            if (quantidade < 0 || precoUnitario < 0) {
+                JOptionPane.showMessageDialog(this, "Quantidade e preço não podem ser negativos!", "Erro", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
             Peca novaPeca = new Peca(0, descricao, quantidade, precoUnitario);
             estoqueController.adicionarPeca(novaPeca);
@@ -135,4 +165,5 @@ public class ConsultaEstoqueView extends JFrame {
         JOptionPane.showMessageDialog(this, "Peça removida com sucesso!");
         atualizarTabela();
     }
+
 }

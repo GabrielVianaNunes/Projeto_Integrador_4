@@ -42,27 +42,59 @@ public class ClienteRepository {
             System.out.println("Erro ao salvar cliente: " + e.getMessage());
         }
     }
+    
+    public Cliente buscarPorId(int id) throws SQLException {
+        String sql = "SELECT * FROM cliente WHERE idcliente = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return criarCliente(rs);
+                }
+            }
+        }
+        return null;
+    }
 
-    public Cliente buscarPorCpfOuCnpj(String cpfOuCnpj) {
-        String sql = "SELECT * FROM cliente WHERE cpf = ? OR cnpj = ?";
-        Cliente cliente = null;
+    
+    public void atualizar(Cliente cliente) throws SQLException {
+        String sql = "UPDATE cliente SET nome = ?, telefone = ?, email = ?, endereco = ?, logradouro = ?, cep = ? WHERE idcliente = ?";
 
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            String valorNormalizado = cpfOuCnpj.replaceAll("[^\\d]", "");
-            stmt.setString(1, valorNormalizado);
-            stmt.setString(2, valorNormalizado);
+            stmt.setString(1, cliente.getNome());
+            stmt.setString(2, cliente.getTelefone());
+            stmt.setString(3, cliente.getEmail());
+            stmt.setString(4, cliente.getEndereco());
+            stmt.setString(5, cliente.getLogradouro());
+            stmt.setString(6, normalizarCEP(cliente.getCep()));
+            stmt.setInt(7, cliente.getIdCliente());
+
+            stmt.executeUpdate();
+        }
+    }
+
+
+    public Cliente buscarPorCpfOuCnpj(String cpfOuCnpj) throws SQLException {
+        Connection connection = DatabaseConnection.getConnection();
+        if (connection == null || connection.isClosed()) {
+            throw new SQLException("A conexão com o banco de dados não está ativa.");
+        }
+
+        String sql = "SELECT * FROM cliente WHERE cpf = ? OR cnpj = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, cpfOuCnpj);
+            stmt.setString(2, cpfOuCnpj);
 
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    cliente = criarCliente(rs);
+                    return criarCliente(rs);
                 }
             }
         } catch (SQLException e) {
-            e.printStackTrace();
-            System.out.println("Erro ao buscar cliente por CPF ou CNPJ: " + e.getMessage());
+            System.err.println("Erro ao buscar cliente por CPF ou CNPJ: " + e.getMessage());
+            throw e;
         }
-
-        return cliente;
+        return null;
     }
 
     public List<Cliente> listarTodos() {
@@ -170,5 +202,4 @@ public class ClienteRepository {
             System.out.println("Erro ao excluir cliente: " + e.getMessage());
         }
     }
-
 }

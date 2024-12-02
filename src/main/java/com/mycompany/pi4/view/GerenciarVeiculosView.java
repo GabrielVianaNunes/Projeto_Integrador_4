@@ -39,13 +39,14 @@ public class GerenciarVeiculosView extends JFrame {
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         JButton excluirButton = new JButton("Excluir");
+        excluirButton.addActionListener(e -> excluirVeiculo()); // Vincula o método de exclusão ao botão
 
         buttonPanel.add(excluirButton);
 
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
 
         add(mainPanel);
-        carregarVeiculos(idCliente);
+        carregarVeiculos(idCliente); // Carrega os veículos ao inicializar
     }
 
     private void carregarVeiculos(int idCliente) {
@@ -58,11 +59,11 @@ public class GerenciarVeiculosView extends JFrame {
 
             for (Veiculo veiculo : veiculos) {
                 model.addRow(new Object[]{
-                    veiculo.getPlaca(),
-                    veiculo.getAno(),
-                    veiculo.getQuilometragem(),
-                    veiculo.getModelo().getNome(),
-                    veiculo.getModelo().getMarca() != null ? veiculo.getModelo().getMarca().getNome() : "Sem Marca"
+                        veiculo.getPlaca(),
+                        veiculo.getAno(),
+                        veiculo.getQuilometragem(),
+                        veiculo.getModelo().getNome(),
+                        veiculo.getModelo().getMarca() != null ? veiculo.getModelo().getMarca().getNome() : "Sem Marca"
                 });
             }
         } catch (Exception e) {
@@ -78,8 +79,19 @@ public class GerenciarVeiculosView extends JFrame {
             if (confirm == JOptionPane.YES_OPTION) {
                 try (Connection connection = DatabaseConnection.getConnection()) {
                     VeiculoRepository veiculoRepository = new VeiculoRepository(connection);
-                    veiculoRepository.excluirPorPlaca(placa); // Usa o método criado no repositório
-                    carregarVeiculos(idCliente); // Atualiza a tabela após exclusão
+                    
+                    // Verifica se a placa está presente
+                    if (placa == null || placa.isEmpty()) {
+                        JOptionPane.showMessageDialog(this, "Erro: Placa não encontrada na tabela!", "Erro", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    
+                    // Exclui o veículo pelo repositório
+                    veiculoRepository.excluirPorPlaca(placa);
+                    
+                    // Atualiza a tabela após exclusão
+                    carregarVeiculos(idCliente);
+                    
                     JOptionPane.showMessageDialog(this, "Veículo excluído com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                 } catch (Exception e) {
                     JOptionPane.showMessageDialog(this, "Erro ao excluir veículo: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
@@ -89,7 +101,7 @@ public class GerenciarVeiculosView extends JFrame {
             JOptionPane.showMessageDialog(this, "Selecione um veículo para excluir.", "Aviso", JOptionPane.WARNING_MESSAGE);
         }
     }
-    
+
     private Veiculo montarVeiculo(ResultSet rs) throws SQLException {
         Veiculo veiculo = new Veiculo();
         veiculo.setIdVeiculo(rs.getInt("idVeiculo"));
@@ -120,6 +132,4 @@ public class GerenciarVeiculosView extends JFrame {
 
         return veiculo;
     }
-
-
 }

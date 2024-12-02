@@ -4,10 +4,13 @@ import com.mycompany.pi4.entity.Cliente;
 import com.mycompany.pi4.entity.PessoaFisica;
 import com.mycompany.pi4.entity.PessoaJuridica;
 import com.mycompany.pi4.repositories.ClienteRepository;
+import com.mycompany.pi4.util.DatabaseConnection;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
 public class GerenciarClientesView extends JFrame {
@@ -61,7 +64,7 @@ public class GerenciarClientesView extends JFrame {
         JButton editarButton = new JButton("Editar");
         editarButton.setBackground(new Color(0, 153, 0));
         editarButton.setForeground(Color.WHITE);
-        editarButton.addActionListener(e -> editarCliente());
+        editarButton.addActionListener(e -> editarCliente(model));
         buttonPanel.add(editarButton);
 
         JButton excluirButton = new JButton("Excluir");
@@ -100,24 +103,50 @@ public class GerenciarClientesView extends JFrame {
         }
     }
 
-    private void editarCliente() {
+    private void editarCliente(DefaultTableModel model) {
         int selectedRow = tabelaClientes.getSelectedRow();
         if (selectedRow == -1) {
             JOptionPane.showMessageDialog(this, "Selecione um cliente para editar!", "Erro", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        int clienteId = (int) tabelaClientes.getValueAt(selectedRow, 0);
-        Cliente cliente = clienteRepository.buscarPorCpfOuCnpj((String) tabelaClientes.getValueAt(selectedRow, 4));
-        if (cliente == null) {
-            JOptionPane.showMessageDialog(this, "Cliente não encontrado!", "Erro", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+        try (Connection connection = DatabaseConnection.getConnection()) {
+            if (connection == null || connection.isClosed()) {
+                JOptionPane.showMessageDialog(this, "Conexão com o banco de dados não está ativa.", "Erro de Conexão", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
 
-        CadastroClienteView cadastroClienteView = new CadastroClienteView();
-        cadastroClienteView.setVisible(true);
-        cadastroClienteView.preencherCamposComCliente(cliente); // Certifique-se de implementar este método na CadastroClienteView
+            ClienteRepository clienteRepository = new ClienteRepository(connection);
+
+            int idCliente = (int) tabelaClientes.getValueAt(selectedRow, 0); // Buscar pelo ID
+            Cliente cliente = clienteRepository.buscarPorId(idCliente); // Novo método buscarPorId no repositório
+            if (cliente == null) {
+                JOptionPane.showMessageDialog(this, "Cliente não encontrado!", "Erro", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            CadastroClienteView cadastroClienteView = new CadastroClienteView();
+            cadastroClienteView.setVisible(true);
+            cadastroClienteView.preencherCamposComCliente(cliente);
+
+            // Listener para salvar alterações após edição
+            cadastroClienteView.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosed(java.awt.event.WindowEvent e) {
+                    try {
+                        clienteRepository.atualizar(cliente);
+                        carregarClientes(model); // Atualizar tabela
+                        JOptionPane.showMessageDialog(null, "Cliente atualizado com sucesso!");
+                    } catch (SQLException ex) {
+                        JOptionPane.showMessageDialog(null, "Erro ao atualizar cliente: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            });
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Erro ao buscar cliente: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+        }
     }
+
 
     private void excluirCliente(DefaultTableModel model) {
         int selectedRow = tabelaClientes.getSelectedRow();

@@ -18,8 +18,11 @@ public class EstoqueController {
 
     // Adicionar uma nova peça ao estoque
     public void adicionarPeca(Peca peca) {
-        String sql = "INSERT INTO Peca (descricao, quantidade, precoUnitario) VALUES (?, ?, ?)";
+        if (peca.getQuantidade() < 0 || peca.getPrecoUnitario() < 0) {
+            throw new IllegalArgumentException("Quantidade ou preço não podem ser negativos.");
+        }
 
+        String sql = "INSERT INTO Peca (descricao, quantidade, precoUnitario) VALUES (?, ?, ?)";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, peca.getDescricao());
             stmt.setInt(2, peca.getQuantidade());
@@ -125,4 +128,5 @@ public class EstoqueController {
             System.err.println("Erro ao editar peça: " + e.getMessage());
         }
     }
+
 }

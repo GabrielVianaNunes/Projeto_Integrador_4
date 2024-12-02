@@ -134,16 +134,18 @@ public class GerenciarClientesView extends JFrame {
                 @Override
                 public void windowClosed(java.awt.event.WindowEvent e) {
                     try {
-                        clienteRepository.atualizar(cliente);
+                        clienteRepository.atualizar(cliente); // Método atualizar para editar cliente no repositório
                         carregarClientes(model); // Atualizar tabela
                         JOptionPane.showMessageDialog(null, "Cliente atualizado com sucesso!");
                     } catch (SQLException ex) {
-                        JOptionPane.showMessageDialog(null, "Erro ao atualizar cliente: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                        // Não exibir mensagem para o usuário, apenas registrar no terminal
+                        System.err.println("Erro ao atualizar cliente: " + ex.getMessage());
                     }
                 }
             });
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Erro ao buscar cliente: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            // Registrar erro no terminal e não exibir mensagem
+            System.err.println("Erro ao buscar cliente: " + ex.getMessage());
         }
     }
 

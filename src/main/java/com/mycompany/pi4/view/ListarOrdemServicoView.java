@@ -23,19 +23,19 @@ public class ListarOrdemServicoView extends JFrame {
     private VeiculoController veiculoController;
 
     public ListarOrdemServicoView(
-                OrdemServicoController ordemServicoController,
-                FuncionarioController funcionarioController,
-                EstoqueController estoqueController,
-                ServicoController servicoController,
-                ClienteController clienteController,
-                VeiculoController veiculoController // Adicionado o VeiculoController
-        ) {
-            this.ordemServicoController = ordemServicoController;
-            this.funcionarioController = funcionarioController;
-            this.estoqueController = estoqueController;
-            this.servicoController = servicoController;
-            this.clienteController = clienteController;
-            this.veiculoController = veiculoController;
+            OrdemServicoController ordemServicoController,
+            FuncionarioController funcionarioController,
+            EstoqueController estoqueController,
+            ServicoController servicoController,
+            ClienteController clienteController,
+            VeiculoController veiculoController // Adicionado o VeiculoController
+    ) {
+        this.ordemServicoController = ordemServicoController;
+        this.funcionarioController = funcionarioController;
+        this.estoqueController = estoqueController;
+        this.servicoController = servicoController;
+        this.clienteController = clienteController;
+        this.veiculoController = veiculoController;
 
         setTitle("Lista de Ordens de Serviço");
         setSize(800, 600);
@@ -68,7 +68,8 @@ public class ListarOrdemServicoView extends JFrame {
                     estoqueController,
                     servicoController,
                     veiculoController, // Adicionado o VeiculoController
-                    clienteController
+                    clienteController,
+                    ordemServicoController // Adicionado
             );
             cadastroOSView.setVisible(true);
         });
@@ -88,42 +89,42 @@ public class ListarOrdemServicoView extends JFrame {
         List<OrdemServico> ordensServico = ordemServicoController.listarOrdensServico();
         for (OrdemServico os : ordensServico) {
             modeloTabela.addRow(new Object[]{
-                os.getIdOS(),
-                os.getDataInicio(),
-                os.getDataFim(),
-                os.getStatus(),
-                os.getValorTotal(),
-                os.getVeiculo() != null ? os.getVeiculo().getIdVeiculo() : "N/A"
+                    os.getIdOS(),
+                    os.getDataInicio(),
+                    os.getDataFim(),
+                    os.getStatus(),
+                    os.getValorTotal(), // Valor total correto
+                    os.getVeiculo() != null ? os.getVeiculo().getIdVeiculo() : "N/A"
             });
         }
         tabelaOrdensServico.addMouseListener(new java.awt.event.MouseAdapter() {
-        public void mouseClicked(java.awt.event.MouseEvent evt) {
-            if (evt.getClickCount() == 2) { // Detecta duplo clique
-                int selectedRow = tabelaOrdensServico.getSelectedRow();
-                if (selectedRow != -1) {
-                    int idOS = (int) tabelaOrdensServico.getValueAt(selectedRow, 0); // Pega o ID da OS na coluna 0
-                    abrirOrdemServico(idOS); // Chama o método para abrir a tela de edição
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                if (evt.getClickCount() == 2) { // Detecta duplo clique
+                    int selectedRow = tabelaOrdensServico.getSelectedRow();
+                    if (selectedRow != -1) {
+                        int idOS = (int) tabelaOrdensServico.getValueAt(selectedRow, 0); // Pega o ID da OS na coluna 0
+                        abrirOrdemServico(idOS); // Chama o método para abrir a tela de edição
+                    }
                 }
             }
-        }
-    });
+        });
     }
-        
+
     private void abrirOrdemServico(int idOS) {
         OrdemServico os = ordemServicoController.consultarOrdemServicoPorId(idOS); // Recupera a O.S do banco
         if (os != null) {
             CadastroOSView cadastroOSView = new CadastroOSView(
-                funcionarioController,
-                estoqueController,
-                servicoController,
-                veiculoController, // Adicionado o VeiculoController
-                clienteController,
-                os // Passa a O.S como parâmetro
+                    funcionarioController,
+                    estoqueController,
+                    servicoController,
+                    veiculoController, // Adicionado o VeiculoController
+                    clienteController,
+                    ordemServicoController, // Adicionado o OrdemServicoController
+                    os // Passa a O.S como parâmetro
             );
             cadastroOSView.setVisible(true);
         } else {
             JOptionPane.showMessageDialog(this, "Ordem de Serviço não encontrada!", "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
-
 }

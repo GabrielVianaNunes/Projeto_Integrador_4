@@ -102,26 +102,27 @@ public class ConsultaEstoqueView extends JFrame {
         try {
             String descricao = JOptionPane.showInputDialog(this, "Descrição da peça:");
             if (descricao == null || descricao.trim().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Descrição inválida!", "Erro", JOptionPane.ERROR_MESSAGE);
-                return;
+                throw new IllegalArgumentException("A descrição não pode ser vazia.");
             }
 
             int quantidade = Integer.parseInt(JOptionPane.showInputDialog(this, "Quantidade:"));
             double precoUnitario = Double.parseDouble(JOptionPane.showInputDialog(this, "Preço Unitário:"));
 
             if (quantidade < 0 || precoUnitario < 0) {
-                JOptionPane.showMessageDialog(this, "Quantidade e preço não podem ser negativos!", "Erro", JOptionPane.ERROR_MESSAGE);
-                return;
+                throw new IllegalArgumentException("Quantidade e preço não podem ser negativos!");
             }
 
-            Peca novaPeca = new Peca(0, descricao, quantidade, precoUnitario);
-            estoqueController.adicionarPeca(novaPeca);
-            JOptionPane.showMessageDialog(this, "Peça adicionada com sucesso!");
+            Peca novaPeca = new Peca(0, descricao, quantidade, precoUnitario); // ID será gerado pelo banco
+            estoqueController.adicionarPeca(novaPeca); // Método salva no banco
             atualizarTabela();
+            JOptionPane.showMessageDialog(this, "Peça adicionada com sucesso!");
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Valores inválidos!", "Erro", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao adicionar peça: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 
     // Edita a peça selecionada
     private void editarPeca() {

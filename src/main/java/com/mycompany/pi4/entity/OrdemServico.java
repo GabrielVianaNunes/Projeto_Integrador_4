@@ -1,5 +1,6 @@
 package com.mycompany.pi4.entity;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -13,8 +14,9 @@ public class OrdemServico {
     private Veiculo veiculo;
     private String descricao;
     private Funcionario funcionario;
-    private List<ItensServico> itensServico; // Lista de ItensServico
-    private List<Peca> pecas; // Lista de peças
+    private Cliente cliente; 
+    private List<ItensServico> itensServico = new ArrayList<>(); 
+    private List<Peca> pecas = new ArrayList<>(); 
 
     public OrdemServico() {
     }
@@ -31,6 +33,15 @@ public class OrdemServico {
     }
 
     // Getters e setters
+    
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
+    
     public int getIdOS() {
         return idOS;
     }

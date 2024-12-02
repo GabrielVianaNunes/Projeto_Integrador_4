@@ -59,7 +59,7 @@ public class CadastroServicoView extends JFrame {
     private void atualizarTabela() {
         DefaultTableModel model = (DefaultTableModel) tabelaServicos.getModel();
         model.setRowCount(0); // Limpa os dados antigos
-        List<Servico> servicos = servicoController.listarServicos();
+        List<Servico> servicos = servicoController.listarServicos(); // Obtém os dados do banco
         for (Servico servico : servicos) {
             model.addRow(new Object[]{servico.getIdServico(), servico.getDescricao(), servico.getPrecoUnitario()});
         }
@@ -73,15 +73,20 @@ public class CadastroServicoView extends JFrame {
             }
 
             double precoUnitario = Double.parseDouble(JOptionPane.showInputDialog(this, "Digite o preço unitário:"));
-            int idServico = servicoController.listarServicos().size() + 1; // Gera o ID incremental
-            Servico novoServico = new Servico(idServico, descricao, precoUnitario);
-            servicoController.adicionarServico(novoServico);
-            atualizarTabela();
+
+            // Criar o serviço com ID como 0, pois será gerado automaticamente
+            Servico novoServico = new Servico(0, descricao, precoUnitario); // ID será gerado automaticamente pelo banco
+            servicoController.adicionarServico(novoServico); // Método já salva no banco
+
+            // Atualiza a tabela com o ID correto
+            atualizarTabela(); 
+
             JOptionPane.showMessageDialog(this, "Serviço adicionado com sucesso!");
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Erro ao adicionar serviço: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
+
 
     private void atualizarServico() {
         try {

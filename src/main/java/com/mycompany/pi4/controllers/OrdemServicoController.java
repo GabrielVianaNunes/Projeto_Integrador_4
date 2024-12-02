@@ -4,6 +4,7 @@
  */
 package com.mycompany.pi4.controllers;
 
+import com.mycompany.pi4.entity.Cliente;
 import com.mycompany.pi4.entity.ItensServico;
 import com.mycompany.pi4.entity.OrdemServico;
 import com.mycompany.pi4.entity.Peca;
@@ -13,6 +14,7 @@ import com.mycompany.pi4.util.DatabaseConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +33,7 @@ public class OrdemServicoController {
         String sql = "INSERT INTO OrdemServico (dataInicio, dataFim, status, valorTotal, idVeiculo) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+
             stmt.setDate(1, new java.sql.Date(os.getDataInicio().getTime()));
             stmt.setDate(2, os.getDataFim() != null ? new java.sql.Date(os.getDataFim().getTime()) : null);
             stmt.setString(3, os.getStatus());
@@ -38,7 +41,6 @@ public class OrdemServicoController {
             stmt.setInt(5, os.getVeiculo().getIdVeiculo());
             stmt.executeUpdate();
 
-            // Retornar o ID gerado
             ResultSet rs = stmt.getGeneratedKeys();
             if (rs.next()) {
                 return rs.getInt(1);
@@ -46,10 +48,8 @@ public class OrdemServicoController {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return -1; // Retorna -1 caso algo dê errado
+        return -1;
     }
-
-
 
     // Atualizar o status de uma ordem de serviço
     public void atualizarStatus(int idOS, String novoStatus) {
@@ -71,7 +71,11 @@ public class OrdemServicoController {
     
     public List<OrdemServico> listarOrdensServico() {
         List<OrdemServico> ordens = new ArrayList<>();
-        String sql = "SELECT * FROM OrdemServico";
+        String sql = """
+            SELECT os.idOS, os.dataInicio, os.dataFim, os.status, os.valorTotal, v.placa
+            FROM OrdemServico os
+            JOIN Veiculo v ON os.idVeiculo = v.idVeiculo
+        """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
@@ -85,8 +89,9 @@ public class OrdemServicoController {
                 os.setStatus(rs.getString("status"));
                 os.setValorTotal(rs.getDouble("valorTotal"));
 
-                // Busque o veículo associado
-                Veiculo veiculo = veiculoController.consultarVeiculoPorId(rs.getInt("idVeiculo"));
+                // Atribuir a placa do veículo
+                Veiculo veiculo = new Veiculo();
+                veiculo.setPlaca(rs.getString("placa"));
                 os.setVeiculo(veiculo);
 
                 ordens.add(os);
@@ -97,13 +102,21 @@ public class OrdemServicoController {
 
         return ordens;
     }
+
     
-    private List<ItensServico> consultarItensServicoPorOrdemServico(int idOS) {
+    public List<ItensServico> consultarItensServicoPorOrdemServico(int idOS) {
         List<ItensServico> itensServico = new ArrayList<>();
-        String sql = "SELECT * FROM ItensServico WHERE idOS = ?";
+        String sql = """
+            SELECT iserv.idItemServico, iserv.quantidade, iserv.precoUnitario, 
+                   s.idServico, s.descricao AS servicoDescricao, s.precoUnitario AS precoServico
+            FROM ItensServico iserv
+            JOIN Servico s ON iserv.idServico = s.idServico
+            WHERE iserv.idOS = ?
+        """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, idOS);
             ResultSet rs = stmt.executeQuery();
 
@@ -113,12 +126,10 @@ public class OrdemServicoController {
                 item.setQuantidade(rs.getInt("quantidade"));
                 item.setPrecoUnitario(rs.getDouble("precoUnitario"));
 
-                // Busque o serviço associado
-                int idServico = rs.getInt("idServico");
-                Servico servico = new Servico(); // Crie um método para buscar o serviço completo, se necessário
-                servico.setIdServico(idServico);
-                servico.setDescricao(rs.getString("descricao"));
-                servico.setPrecoUnitario(rs.getDouble("precoUnitario"));
+                Servico servico = new Servico();
+                servico.setIdServico(rs.getInt("idServico"));
+                servico.setDescricao(rs.getString("servicoDescricao"));
+                servico.setPrecoUnitario(rs.getDouble("precoServico"));
                 item.setServico(servico);
 
                 itensServico.add(item);
@@ -129,23 +140,31 @@ public class OrdemServicoController {
 
         return itensServico;
     }
+
+
     
-    private List<Peca> consultarPecasPorOrdemServico(int idOS) {
+    public List<Peca> consultarPecasPorOrdemServico(int idOS) {
         List<Peca> pecas = new ArrayList<>();
-        String sql = "SELECT * FROM ItensPeca WHERE idOS = ?";
+        String sql = """
+            SELECT ip.idItemPeca, ip.quantidade, ip.precoUnitario, 
+                   p.idPeca, p.descricao AS pecaDescricao, p.precoUnitario AS precoPeca
+            FROM ItensPeca ip
+            JOIN Peca p ON ip.idPeca = p.idPeca
+            WHERE ip.idOS = ?
+        """;
 
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, idOS);
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
                 Peca peca = new Peca();
                 peca.setIdPeca(rs.getInt("idPeca"));
-                peca.setDescricao(rs.getString("descricao"));
+                peca.setDescricao(rs.getString("pecaDescricao"));
                 peca.setQuantidade(rs.getInt("quantidade"));
                 peca.setPrecoUnitario(rs.getDouble("precoUnitario"));
-
                 pecas.add(peca);
             }
         } catch (Exception e) {
@@ -157,39 +176,66 @@ public class OrdemServicoController {
 
 
     public OrdemServico consultarOrdemServicoPorId(int idOS) {
-        try (Connection connection = DatabaseConnection.getConnection()) {
-            String sql = "SELECT * FROM OrdemServico WHERE idOS = ?";
-            PreparedStatement stmt = connection.prepareStatement(sql);
+        if (idOS <= 0) {
+            System.err.println("ID inválido fornecido: " + idOS);
+            return null;
+        }
+
+        String sql = """
+            SELECT os.idOS, os.dataInicio, os.dataFim, os.status, os.valorTotal, os.idVeiculo,
+                   v.placa, c.nome AS clienteNome
+            FROM OrdemServico os
+            JOIN Veiculo v ON os.idVeiculo = v.idVeiculo
+            JOIN Cliente c ON v.idCliente = c.idCliente
+            WHERE os.idOS = ?
+        """;
+
+        try (Connection connection = DatabaseConnection.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(sql)) {
+
             stmt.setInt(1, idOS);
-            ResultSet rs = stmt.executeQuery();
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    OrdemServico os = new OrdemServico();
+                    os.setIdOS(rs.getInt("idOS"));
+                    os.setDataInicio(rs.getDate("dataInicio"));
+                    os.setDataFim(rs.getDate("dataFim"));
+                    os.setStatus(rs.getString("status"));
+                    os.setValorTotal(rs.getDouble("valorTotal"));
 
-            if (rs.next()) {
-                OrdemServico os = new OrdemServico();
-                os.setIdOS(rs.getInt("idOS"));
-                os.setDataInicio(rs.getDate("dataInicio"));
-                os.setDataFim(rs.getDate("dataFim"));
-                os.setStatus(rs.getString("status"));
-                os.setValorTotal(rs.getDouble("valorTotal"));
+                    // Veículo
+                    Veiculo veiculo = new Veiculo();
+                    veiculo.setIdVeiculo(rs.getInt("idVeiculo"));
+                    veiculo.setPlaca(rs.getString("placa"));
+                    os.setVeiculo(veiculo);
 
-                // Busque o veículo associado
-                Veiculo veiculo = veiculoController.consultarVeiculoPorId(rs.getInt("idVeiculo"));
-                os.setVeiculo(veiculo);
+                    // Cliente
+                    Cliente cliente = new Cliente();
+                    cliente.setNome(rs.getString("clienteNome"));
+                    os.setCliente(cliente);
 
-                // Busque os itens de serviço
-                List<ItensServico> itensServico = consultarItensServicoPorOrdemServico(idOS);
-                os.setItensServico(itensServico);
+                    // Carregar serviços e peças
+                    System.out.println("Carregando itens de serviço para a OS: " + idOS);
+                    os.setItensServico(consultarItensServicoPorOrdemServico(idOS));
 
-                // Busque as peças
-                List<Peca> pecas = consultarPecasPorOrdemServico(idOS);
-                os.setPecas(pecas);
+                    System.out.println("Carregando peças para a OS: " + idOS);
+                    os.setPecas(consultarPecasPorOrdemServico(idOS));
 
-                return os;
+                    System.out.println("Consulta concluída com sucesso para OS: " + idOS);
+                    return os;
+                } else {
+                    System.err.println("Nenhuma Ordem de Serviço encontrada com o ID: " + idOS);
+                }
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
+            System.err.println("Erro ao consultar a Ordem de Serviço com ID: " + idOS);
             e.printStackTrace();
         }
+
         return null;
     }
+
+
     
     public void atualizarStatusOrdemServico(int idOS, String novoStatus) {
         String sql = "UPDATE OrdemServico SET status = ? WHERE idOS = ?";
@@ -212,21 +258,61 @@ public class OrdemServicoController {
         String sql = "UPDATE OrdemServico SET dataInicio = ?, dataFim = ?, status = ?, valorTotal = ?, idVeiculo = ? WHERE idOS = ?";
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setDate(1, new java.sql.Date(os.getDataInicio().getTime()));
             stmt.setDate(2, os.getDataFim() != null ? new java.sql.Date(os.getDataFim().getTime()) : null);
             stmt.setString(3, os.getStatus());
             stmt.setDouble(4, os.getValorTotal());
             stmt.setInt(5, os.getVeiculo().getIdVeiculo());
             stmt.setInt(6, os.getIdOS());
-            int rowsUpdated = stmt.executeUpdate();
-            if (rowsUpdated > 0) {
-                System.out.println("Ordem de Serviço atualizada com sucesso!");
-            } else {
-                System.out.println("Nenhuma Ordem de Serviço encontrada para o ID " + os.getIdOS());
-            }
+            stmt.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Erro ao atualizar Ordem de Serviço: " + e.getMessage());
+        }
+    }
+    
+    public void salvarItemServico(int idOS, ItensServico item) {
+        if (item.getServico() == null || item.getServico().getIdServico() <= 0) {
+            throw new IllegalArgumentException("ID do serviço inválido: " + 
+                (item.getServico() != null ? item.getServico().getIdServico() : "null"));
+        }
+
+        String sql = "INSERT INTO ItensServico (idOS, idServico, quantidade, precoUnitario) VALUES (?, ?, ?, ?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, idOS);
+            stmt.setInt(2, item.getServico().getIdServico());
+            stmt.setInt(3, item.getQuantidade());
+            stmt.setDouble(4, item.getPrecoUnitario());
+            stmt.executeUpdate();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Erro ao salvar item de serviço: " + e.getMessage());
+        }
+    }
+
+
+
+    public void salvarItemPeca(int idOS, Peca peca) {
+        String sql = "INSERT INTO ItensPeca (idOS, idPeca, quantidade, precoUnitario) VALUES (?, ?, ?, ?)";
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            // Validação para evitar ID inválido
+            if (peca == null || peca.getIdPeca() <= 0) {
+                throw new IllegalArgumentException("ID da peça inválido: " + (peca != null ? peca.getIdPeca() : "null"));
+            }
+
+            stmt.setInt(1, idOS);
+            stmt.setInt(2, peca.getIdPeca());
+            stmt.setInt(3, peca.getQuantidade());
+            stmt.setDouble(4, peca.getPrecoUnitario());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Erro ao salvar item de peça: " + e.getMessage());
         }
     }
 

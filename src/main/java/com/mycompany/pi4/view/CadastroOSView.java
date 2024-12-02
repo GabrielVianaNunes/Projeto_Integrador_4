@@ -48,17 +48,19 @@ public class CadastroOSView extends JFrame {
     private Integer idOS;
 
     public CadastroOSView(
-        FuncionarioController funcionarioController,
-        EstoqueController estoqueController,
-        ServicoController servicoController,
-        VeiculoController veiculoController, // Adicionado o VeiculoController
-        ClienteController clienteController
+            FuncionarioController funcionarioController,
+            EstoqueController estoqueController,
+            ServicoController servicoController,
+            VeiculoController veiculoController,
+            ClienteController clienteController,
+            OrdemServicoController ordemServicoController // Adicionado o OrdemServicoController
     ) {
         this.funcionarioController = funcionarioController;
         this.estoqueController = estoqueController;
         this.servicoController = servicoController;
-        this.veiculoController = veiculoController; // Inicializa o VeiculoController
-        this.clienteController = clienteController; // Inicializa o ClienteController
+        this.veiculoController = veiculoController;
+        this.clienteController = clienteController;
+        this.ordemServicoController = ordemServicoController; // Inicializa a variável
         this.pecasParaAtualizar = new ArrayList<>();
         setTitle("Cadastro de Ordem de Serviço");
         setSize(900, 700);
@@ -271,7 +273,7 @@ public class CadastroOSView extends JFrame {
             campo.setCaretPosition(textoFormatado.length()); // Mantém o cursor no final do texto
         }
     }
-    
+
     private boolean isBuscaPorCpf = true; // Flag para controlar se é CPF ou CNPJ
 
     // Método para formatar CPF ou CNPJ baseado na escolha do usuário
@@ -356,11 +358,12 @@ public class CadastroOSView extends JFrame {
             FuncionarioController funcionarioController,
             EstoqueController estoqueController,
             ServicoController servicoController,
-            VeiculoController veiculoController, // Adicionado o VeiculoController
+            VeiculoController veiculoController,
             ClienteController clienteController,
+            OrdemServicoController ordemServicoController, // Adicionado o OrdemServicoController
             OrdemServico os // Adicionado para suportar a abertura de uma OS existente
     ) {
-        this(funcionarioController, estoqueController, servicoController, veiculoController, clienteController);
+        this(funcionarioController, estoqueController, servicoController, veiculoController, clienteController, ordemServicoController);
         if (os != null) {
             this.idOS = os.getIdOS(); // Atribui o ID da O.S.
             preencherCamposComOS(os); // Preenche os campos com os dados da O.S.
@@ -454,11 +457,11 @@ public class CadastroOSView extends JFrame {
             emailField.setText(clienteSelecionado.getEmail());
             enderecoField.setText(clienteSelecionado.getEndereco());
             cepField.setText(clienteSelecionado.getCep());
-            
+
             carregarVeiculosDoCliente(clienteSelecionado.getIdCliente());
         }
     }
-    
+
     private void carregarVeiculosDoCliente(int idCliente) {
         veiculoComboBox.removeAllItems();
         List<Veiculo> veiculos = veiculoController.buscarVeiculosPorCliente(idCliente);
@@ -512,7 +515,6 @@ public class CadastroOSView extends JFrame {
             }
         }
     }
-
 
     private String formatarTelefone(String telefone) {
         return telefone.replaceAll("(\\d{2})(\\d{5})(\\d{4})", "($1) $2-$3");
@@ -669,21 +671,37 @@ public class CadastroOSView extends JFrame {
                 throw new IllegalArgumentException("Todos os campos devem ser preenchidos!");
             }
 
+            // Criação do objeto OrdemServico
             OrdemServico os = new OrdemServico();
             os.setVeiculo(veiculoSelecionado);
             os.setDescricao(descricao);
             os.setFuncionario(tecnico);
             os.setStatus(status);
             os.setDataInicio(java.sql.Date.valueOf(data)); // Converte a data para o formato correto
-            os.setItensServico(new ArrayList<>()); // Adicione os itens de serviço aqui, se necessário
-            os.setPecas(pecasParaAtualizar); // Associa as peças atualizadas à O.S.
 
-            // Cria ou atualiza a O.S.
+            // Calcula o valor total da OS
+            double total = 0.0;
+
+            // Soma dos serviços
+            DefaultTableModel servicoModel = (DefaultTableModel) itensServicoTable.getModel();
+            for (int i = 0; i < servicoModel.getRowCount(); i++) {
+                total += (double) servicoModel.getValueAt(i, 3); // Subtotal na coluna 3
+            }
+
+            // Soma das peças
+            DefaultTableModel pecaModel = (DefaultTableModel) itensPecaTable.getModel();
+            for (int i = 0; i < pecaModel.getRowCount(); i++) {
+                total += (double) pecaModel.getValueAt(i, 4); // Subtotal na coluna 4
+            }
+
+            os.setValorTotal(total); // Define o valor total da OS
+
+            // Cria ou atualiza a OS
             if (idOS == null) {
-                idOS = ordemServicoController.criarOrdemServico(os); // Criar nova O.S.
+                idOS = ordemServicoController.criarOrdemServico(os); // Criar nova OS
             } else {
                 os.setIdOS(idOS);
-                ordemServicoController.atualizarOrdemServico(os); // Atualizar O.S. existente
+                ordemServicoController.atualizarOrdemServico(os); // Atualizar OS existente
             }
 
             // Atualiza o estoque das peças utilizadas

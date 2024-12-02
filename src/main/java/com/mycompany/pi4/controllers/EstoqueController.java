@@ -36,8 +36,11 @@ public class EstoqueController {
 
     // Atualizar quantidade de uma peça
     public void atualizarQuantidade(int idPeca, int novaQuantidade) {
-        String sql = "UPDATE Peca SET quantidade = ? WHERE idPeca = ?";
+        if (novaQuantidade < 0) {
+            throw new IllegalArgumentException("Quantidade não pode ser negativa.");
+        }
 
+        String sql = "UPDATE Peca SET quantidade = ? WHERE idPeca = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, novaQuantidade);
             stmt.setInt(2, idPeca);
@@ -73,8 +76,11 @@ public class EstoqueController {
 
     // Consultar detalhes de uma peça específica
     public Peca consultarPecaPorId(int idPeca) {
-        String sql = "SELECT * FROM Peca WHERE idPeca = ?";
+        if (idPeca <= 0) {
+            throw new IllegalArgumentException("ID da peça inválido: " + idPeca);
+        }
 
+        String sql = "SELECT * FROM Peca WHERE idPeca = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, idPeca);
 
@@ -91,13 +97,16 @@ public class EstoqueController {
         } catch (SQLException e) {
             System.err.println("Erro ao consultar peça: " + e.getMessage());
         }
-        return null;
+        return null; // Retorna null se a peça não for encontrada
     }
 
     // Verificar se há quantidade suficiente de uma peça
     public boolean verificarDisponibilidade(int idPeca, int quantidadeDesejada) {
         Peca peca = consultarPecaPorId(idPeca);
-        return peca != null && peca.getQuantidade() >= quantidadeDesejada;
+        if (peca == null) {
+            throw new IllegalArgumentException("Peça não encontrada no estoque para o ID: " + idPeca);
+        }
+        return peca.getQuantidade() >= quantidadeDesejada;
     }
 
     // Remover uma peça do estoque
@@ -115,8 +124,11 @@ public class EstoqueController {
 
     // Editar os detalhes de uma peça
     public void editarPeca(int idPeca, String novaDescricao, int novaQuantidade, double novoPreco) {
-        String sql = "UPDATE Peca SET descricao = ?, quantidade = ?, precoUnitario = ? WHERE idPeca = ?";
+        if (novaQuantidade < 0 || novoPreco < 0) {
+            throw new IllegalArgumentException("Quantidade ou preço não podem ser negativos.");
+        }
 
+        String sql = "UPDATE Peca SET descricao = ?, quantidade = ?, precoUnitario = ? WHERE idPeca = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setString(1, novaDescricao);
             stmt.setInt(2, novaQuantidade);
@@ -128,5 +140,4 @@ public class EstoqueController {
             System.err.println("Erro ao editar peça: " + e.getMessage());
         }
     }
-
 }

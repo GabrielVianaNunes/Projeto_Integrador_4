@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ClienteRepository {
+
     private Connection connection;
 
     public ClienteRepository(Connection connection) {
@@ -27,8 +28,8 @@ public class ClienteRepository {
             stmt.setString(5, cliente.getLogradouro());
             stmt.setString(6, normalizarCEP(cliente.getCep()));
             stmt.setString(7, cliente instanceof PessoaFisica ? "PF" : "PJ");
-            stmt.setString(8, normalizarCPF(cliente.getCpf()));
-            stmt.setString(9, normalizarCNPJ(cliente.getCnpj()));
+            stmt.setString(8, cliente instanceof PessoaFisica ? normalizarCPF(cliente.getCpf()) : null);
+            stmt.setString(9, cliente instanceof PessoaJuridica ? normalizarCNPJ(cliente.getCnpj()) : null);
 
             stmt.executeUpdate();
 
@@ -39,10 +40,10 @@ public class ClienteRepository {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            System.out.println("Erro ao salvar cliente: " + e.getMessage());
+            throw new RuntimeException("Erro ao salvar cliente: " + e.getMessage());
         }
     }
-    
+
     public Cliente buscarPorId(int id) throws SQLException {
         String sql = "SELECT * FROM cliente WHERE idcliente = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
@@ -56,7 +57,6 @@ public class ClienteRepository {
         return null;
     }
 
-    
     public void atualizar(Cliente cliente) throws SQLException {
         String sql = "UPDATE cliente SET nome = ?, telefone = ?, email = ?, endereco = ?, logradouro = ?, cep = ? WHERE idcliente = ?";
 
@@ -72,7 +72,6 @@ public class ClienteRepository {
             stmt.executeUpdate();
         }
     }
-
 
     public Cliente buscarPorCpfOuCnpj(String cpfOuCnpj) throws SQLException {
         Connection connection = DatabaseConnection.getConnection();
@@ -101,8 +100,7 @@ public class ClienteRepository {
         List<Cliente> clientes = new ArrayList<>();
         String sql = "SELECT * FROM cliente";
 
-        try (PreparedStatement stmt = connection.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+        try (PreparedStatement stmt = connection.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 clientes.add(criarCliente(rs));
             }
@@ -136,8 +134,7 @@ public class ClienteRepository {
 
     public int obterProximoId() {
         String sql = "SELECT nextval('cliente_idcliente_seq')";
-        try (Statement stmt = connection.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+        try (Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
             if (rs.next()) {
                 return rs.getInt(1);
             }
@@ -171,25 +168,30 @@ public class ClienteRepository {
     }
 
     private String normalizarCPF(String cpf) {
-        if (cpf == null) return null;
+        if (cpf == null) {
+            return null;
+        }
         return cpf.replaceAll("[^\\d]", "");
     }
 
     private String normalizarCNPJ(String cnpj) {
-        if (cnpj == null) return null;
+        if (cnpj == null) {
+            return null;
+        }
         return cnpj.replaceAll("[^\\d]", "");
     }
 
     private String normalizarCEP(String cep) {
-        if (cep == null) return null;
+        if (cep == null) {
+            return null;
+        }
         return cep.replaceAll("[^\\d]", "");
     }
-    
+
     public void excluir(int idCliente) {
         String sql = "DELETE FROM cliente WHERE idcliente = ?";
 
-        try (Connection connection = DatabaseConnection.getConnection();
-             PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection connection = DatabaseConnection.getConnection(); PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, idCliente);
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected > 0) {

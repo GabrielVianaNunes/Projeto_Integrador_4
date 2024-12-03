@@ -116,7 +116,7 @@ public class CadastroClienteView extends JFrame {
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
         buttonPanel.setBackground(new Color(245, 245, 245));
-        
+
         // Adicione esse botão no painel de botões
         JButton gerenciarClientesButton = new JButton("Gerenciar Clientes");
         gerenciarClientesButton.setBackground(new Color(0, 102, 204));
@@ -132,7 +132,6 @@ public class CadastroClienteView extends JFrame {
         });
         buttonPanel.add(gerenciarClientesButton);
 
-
         salvarButton = new JButton("Salvar");
         salvarButton.setBackground(new Color(0, 102, 204));
         salvarButton.setForeground(Color.WHITE);
@@ -140,7 +139,6 @@ public class CadastroClienteView extends JFrame {
             String tipoCliente = tipoClienteComboBox.getSelectedItem().toString().equals("Pessoa Física") ? "PF" : "PJ";
 
             Cliente cliente = tipoCliente.equals("PF") ? new PessoaFisica() : new PessoaJuridica();
-            cliente.setIdCliente(Integer.parseInt(idClienteField.getText())); // Mantém o mesmo ID
             cliente.setNome(nomeField.getText().trim());
             cliente.setTelefone(telefoneField.getText().trim());
             cliente.setEmail(emailField.getText().trim());
@@ -149,23 +147,20 @@ public class CadastroClienteView extends JFrame {
             cliente.setCep(cepField.getText().trim());
 
             if (cliente instanceof PessoaFisica) {
-                ((PessoaFisica) cliente).setCpf(cpfField.getText().trim()); // Mantém CPF sem alterações
+                ((PessoaFisica) cliente).setCpf(cpfField.getText().trim());
             } else if (cliente instanceof PessoaJuridica) {
-                ((PessoaJuridica) cliente).setCnpj(cnpjField.getText().trim()); // Mantém CNPJ sem alterações
+                ((PessoaJuridica) cliente).setCnpj(cnpjField.getText().trim());
             }
 
             try (Connection connection = DatabaseConnection.getConnection()) {
                 ClienteRepository clienteRepository = new ClienteRepository(connection);
-
-                clienteRepository.atualizar(cliente); // Certifique-se de que existe um método atualizar
-                JOptionPane.showMessageDialog(this, "Cliente atualizado com sucesso!");
+                clienteRepository.salvar(cliente); // Usa o método corrigido
+                JOptionPane.showMessageDialog(this, "Cliente salvo com sucesso!");
                 dispose(); // Fecha a janela após salvar
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(this, "Erro ao salvar cliente: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
             }
         });
-
-
 
         buttonPanel.add(salvarButton);
 
@@ -184,11 +179,11 @@ public class CadastroClienteView extends JFrame {
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
         add(mainPanel);
     }
-    
+
     private void limparCampos() {
         idClienteField.setText("");
         nomeField.setText("");
-        tipoClienteComboBox.setSelectedIndex(0); 
+        tipoClienteComboBox.setSelectedIndex(0);
         cpfField.setText("");
         cnpjField.setText("");
         telefoneField.setText("");
@@ -198,11 +193,10 @@ public class CadastroClienteView extends JFrame {
         cepField.setText("");
     }
 
-
     private void formatarNome() {
         String texto = nomeField.getText();
-        String textoFormatado = texto.replaceAll("[^a-zA-ZáàâãéèêíïóôõöúçñÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑ\\s]", ""); 
-        textoFormatado = textoFormatado.replaceAll("\\s{2,}", " "); 
+        String textoFormatado = texto.replaceAll("[^a-zA-ZáàâãéèêíïóôõöúçñÁÀÂÃÉÈÊÍÏÓÔÕÖÚÇÑ\\s]", "");
+        textoFormatado = textoFormatado.replaceAll("\\s{2,}", " ");
 
         // Atualiza o campo apenas se houver alteração
         if (!textoFormatado.equals(texto)) {
@@ -213,7 +207,9 @@ public class CadastroClienteView extends JFrame {
 
     private void formatarCPF() {
         String texto = cpfField.getText().replaceAll("[^\\d]", "");
-        if (texto.length() > 11) texto = texto.substring(0, 11);
+        if (texto.length() > 11) {
+            texto = texto.substring(0, 11);
+        }
         String formatado = texto.length() > 9
                 ? texto.replaceFirst("(\\d{3})(\\d{3})(\\d{3})(\\d+)", "$1.$2.$3-$4")
                 : texto.length() > 6
@@ -272,7 +268,9 @@ public class CadastroClienteView extends JFrame {
 
     private void formatarTelefone() {
         String texto = telefoneField.getText().replaceAll("[^\\d]", "");
-        if (texto.length() > 11) texto = texto.substring(0, 11);
+        if (texto.length() > 11) {
+            texto = texto.substring(0, 11);
+        }
         String formatado = texto.length() > 6
                 ? texto.replaceFirst("(\\d{2})(\\d{5})(\\d+)", "($1) $2-$3")
                 : texto.length() > 2
@@ -283,7 +281,9 @@ public class CadastroClienteView extends JFrame {
 
     private void formatarCEP() {
         String texto = cepField.getText().replaceAll("[^\\d]", "");
-        if (texto.length() > 8) texto = texto.substring(0, 8);
+        if (texto.length() > 8) {
+            texto = texto.substring(0, 8);
+        }
         cepField.setText(texto.replaceFirst("(\\d{5})(\\d+)", "$1-$2"));
     }
 
@@ -300,7 +300,7 @@ public class CadastroClienteView extends JFrame {
             }
         }
     }
-    
+
     public void preencherCamposComCliente(Cliente cliente) {
         idClienteField.setText(String.valueOf(cliente.getIdCliente()));
         nomeField.setText(cliente.getNome());

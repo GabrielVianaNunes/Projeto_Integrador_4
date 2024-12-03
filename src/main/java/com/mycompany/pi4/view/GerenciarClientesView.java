@@ -89,13 +89,14 @@ public class GerenciarClientesView extends JFrame {
         try {
             List<Cliente> clientes = clienteRepository.listarTodos();
             for (Cliente cliente : clientes) {
+                String cpfCnpj = cliente instanceof PessoaFisica ? ((PessoaFisica) cliente).getCpf() : ((PessoaJuridica) cliente).getCnpj();
                 model.addRow(new Object[]{
-                        cliente.getIdCliente(),
-                        cliente.getNome(),
-                        cliente.getTelefone(),
-                        cliente.getEmail(),
-                        cliente instanceof PessoaFisica ? ((PessoaFisica) cliente).getCpf() : ((PessoaJuridica) cliente).getCnpj(),
-                        cliente instanceof PessoaFisica ? "PF" : "PJ"
+                    cliente.getIdCliente(),
+                    cliente.getNome(),
+                    cliente.getTelefone(),
+                    cliente.getEmail(),
+                    cpfCnpj,
+                    cliente instanceof PessoaFisica ? "PF" : "PJ"
                 });
             }
         } catch (Exception e) {
@@ -148,7 +149,6 @@ public class GerenciarClientesView extends JFrame {
             System.err.println("Erro ao buscar cliente: " + ex.getMessage());
         }
     }
-
 
     private void excluirCliente(DefaultTableModel model) {
         int selectedRow = tabelaClientes.getSelectedRow();
